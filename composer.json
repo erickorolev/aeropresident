@@ -1,0 +1,11 @@
+{
+    "require": {
+        "ezyang/htmlpurifier": "^4.13",
+        "phpoffice/phpspreadsheet": "^1.17",
+        "smarty/smarty": "^3.1",
+        "spatie/ray": "^1.21"
+    },
+    "require-dev": {
+        "kint-php/kint": "^3.3"
+    }
+}

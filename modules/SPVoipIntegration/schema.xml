@@ -1,0 +1,21 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vtiger_sp_voip_default_provider</name>
+			<sql><![CDATA[create table vtiger_sp_voip_default_provider (
+	default_provider varchar(255)
+)]]></sql>
+		</table>
+		<table>
+			<name>vtiger_sp_voipintegration_settings</name>
+			<sql><![CDATA[create table vtiger_sp_voipintegration_settings (
+	id int(19),
+	provider_name varchar(255),
+	field_name varchar(255) unique,
+        field_label varchar(255),
+        field_value varchar(255)
+)]]></sql>
+		</table>
+	</tables>
+</schema>
