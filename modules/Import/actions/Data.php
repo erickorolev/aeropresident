@@ -450,9 +450,32 @@ class Import_Data_Action extends Vtiger_Action_Controller {
             //SalesPlatform.ru begin
             if($entityInfo['id'] != null) {
                 $recordId = end(explode("x", $entityInfo['id']));
-                $this->entityData[] = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+                /** @var Vtiger_Record_Model $recordFullModel */
+                $recordFullModel = Vtiger_Record_Model::getInstanceById($recordId, $moduleName);
+                $this->entityData[] = $recordFullModel;
             }
             //SalesPlatform.ru end
+            if ($recordFullModel && $recordFullModel->get('imagename')) {
+                $images = explode(';', $recordFullModel->get('imagename'));
+                if (isset($images[0])) {
+                    $imageUrl = $images[0];
+                    if ($imageUrl) {
+                        $imagename = basename($imageUrl);
+                        file_put_contents('/tmp/' . $imagename, $this->file_get_contents_curl($imageUrl));
+                        if (file_exists('/tmp/' . $imagename)) {
+                            $fileDetails = array(
+                                'name' => $imagename,
+                                'type' => $this->get_image_mime_type("/tmp/" . $imagename),
+                                'tmp_name' => "/tmp/" . $imagename,
+                                'error' => 0,
+                                'size' => 100,
+                                'original_name' => $imagename
+                            );
+                            $recordFullModel->getEntity()->uploadAndSaveFile($recordFullModel->getId(), $recordFullModel->getModuleName(), $fileDetails, 'Image');
+                        }
+                    }
+                }
+            }
 		}
 
 		//Update missing seq numbers
@@ -479,6 +502,60 @@ class Import_Data_Action extends Vtiger_Action_Controller {
 		$result = null;
 		return true;
 	}
+
+	protected function file_get_contents_curl( $url )
+    {
+        $ch = curl_init();
+
+        curl_setopt( $ch, CURLOPT_AUTOREFERER, TRUE );
+        curl_setopt( $ch, CURLOPT_HEADER, 0 );
+        curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+        curl_setopt( $ch, CURLOPT_URL, $url );
+        curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, TRUE );
+        curl_setopt($ch, CURLOPT_SSL_CIPHER_LIST, 'DEFAULT@SECLEVEL=1');
+
+        $data = curl_exec( $ch );
+        ray(curl_error($ch));
+        curl_close( $ch );
+
+        return $data;
+    }
+
+    /**
+     * @param $image_path
+     * @return bool|mixed
+     */
+    protected function get_image_mime_type($image_path)
+    {
+        $mimes  = array(
+            IMAGETYPE_GIF => "image/gif",
+            IMAGETYPE_JPEG => "image/jpg",
+            IMAGETYPE_PNG => "image/png",
+            IMAGETYPE_SWF => "image/swf",
+            IMAGETYPE_PSD => "image/psd",
+            IMAGETYPE_BMP => "image/bmp",
+            IMAGETYPE_TIFF_II => "image/tiff",
+            IMAGETYPE_TIFF_MM => "image/tiff",
+            IMAGETYPE_JPC => "image/jpc",
+            IMAGETYPE_JP2 => "image/jp2",
+            IMAGETYPE_JPX => "image/jpx",
+            IMAGETYPE_JB2 => "image/jb2",
+            IMAGETYPE_SWC => "image/swc",
+            IMAGETYPE_IFF => "image/iff",
+            IMAGETYPE_WBMP => "image/wbmp",
+            IMAGETYPE_XBM => "image/xbm",
+            IMAGETYPE_ICO => "image/ico");
+
+        if (($image_type = exif_imagetype($image_path))
+            && (array_key_exists($image_type ,$mimes)))
+        {
+            return $mimes[$image_type];
+        }
+        else
+        {
+            return FALSE;
+        }
+    }
 
 	public function transformForImport($fieldData, $moduleMeta, $fillDefault = true, $checkMandatoryFieldValues = true) {
 		global $current_user;
