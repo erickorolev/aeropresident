@@ -32,7 +32,7 @@
                             </div>
                             <div class="row">
                                 <select class="form-control" data-rule-required="true" name="use_common_template" id="use_common_template" multiple>
-                                    {foreach name="tplForeach" from="$CRM_TEMPLATES" item="itemArr" key="templateid"}
+                                    {foreach name="tplForeach" from=$CRM_TEMPLATES item="itemArr" key="templateid"}
                                         <option value="{$templateid}" {if $itemArr.title neq ""}title="{$itemArr.title}"{/if} {if $itemArr.is_default eq '1' || $itemArr.is_default eq '3'}selected="selected"{/if}>{$itemArr.templatename}</option>
                                     {/foreach}
                                 </select>
