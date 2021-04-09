@@ -302,14 +302,16 @@ class Vtiger_Field_Model extends Vtiger_Field {
 				$picklistValues = Vtiger_Util_Helper::getRoleBasedPicklistValues($fieldName, $userModel->get('roleid'));
 			}else{
 				$picklistValues = Vtiger_Util_Helper::getPickListValues($fieldName);
-				$fieldName = $this->getName();
+			}
+			$fieldName = $this->getName();
 	            if ($fieldName === 'user_default_module'){
 	            $picklistValues = $this->getModulesList();
 	            }
-			}
+
 			foreach($picklistValues as $value) {
 				$fieldPickListValues[$value] = vtranslate($value,$this->getModuleName());
 			}
+
 			return $fieldPickListValues;
 		}
 		return null;
