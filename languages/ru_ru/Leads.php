@@ -52,9 +52,9 @@ $languageStrings = array(
     'Prospecting'                  => 'Разведка',
     'LBL_IMAGE_INFORMATION' => 'Изображение профиля',
     'Lead Image' => 'Изображение Закявки',
-    'Phone' => 'Основной телефон',
+    'Phone' => 'Телефон',
     'Secondary Email' => 'Второй адрес электронной почты',
-    'Email' => 'Основной адрес электронной почты',    
+    'Email' => 'Email',    
 );
 $jsLanguageStrings = array(
 	'JS_SELECT_CONTACTS'           => 'Выберите контакты для продолжения'  , // TODO: Review
