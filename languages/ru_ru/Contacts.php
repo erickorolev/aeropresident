@@ -8,13 +8,13 @@
  * All Rights Reserved.
  ************************************************************************************/
 $languageStrings = array(
-	'Contacts'                     => 'Физ. лица'            , 
-	'SINGLE_Contacts'              => 'Физ. лицо'              , 
-	'LBL_ADD_RECORD'               => 'Добавить Физ. лицо'                 , // TODO: Review
-	'LBL_RECORDS_LIST'             => 'Список Физ. лиц'               , // TODO: Review
-	'LBL_CONTACT_INFORMATION'      => 'Информация о физ. лице', 
+	'Contacts'                     => 'Клиенты'            , 
+	'SINGLE_Contacts'              => 'Клиент'              , 
+	'LBL_ADD_RECORD'               => 'Добавить Клиента'                 , // TODO: Review
+	'LBL_RECORDS_LIST'             => 'Список Клиентов'               , // TODO: Review
+	'LBL_CONTACT_INFORMATION'      => 'Информация о клиенте', 
 	'LBL_CUSTOMER_PORTAL_INFORMATION' => 'Информация пользователя портала', 
-	'LBL_IMAGE_INFORMATION'        => 'Изображение Физ. лица', 
+	'LBL_IMAGE_INFORMATION'        => 'Изображение Клиента', 
 	'LBL_COPY_OTHER_ADDRESS'       => 'Копировать другой адрес', // KEY 5.x: LBL_CPY_OTHER_ADDRESS
 	'LBL_COPY_MAILING_ADDRESS'     => 'Копировать почтовый адрес', // KEY 5.x: LBL_CPY_MAILING_ADDRESS
 	'Office Phone'                 => 'Рабочий тел.'      , 
