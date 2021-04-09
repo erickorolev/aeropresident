@@ -1,4 +1,4 @@
-<?php
+>h<?php
 /*+**********************************************************************************
  * The contents of this file are subject to the vtiger CRM Public License Version 1.0
  * ("License"); You may not use this file except in compliance with the License
@@ -8,15 +8,15 @@
  * All Rights Reserved.
  ************************************************************************************/
 $languageStrings = array(
-	'Accounts'                     => 'Юр. лица'      , 
-	'SINGLE_Accounts'              => 'Юр. лицо'        , 
-	'LBL_ADD_RECORD'               => 'Добавить Юр. лицо'            , // TODO: Review
-	'LBL_RECORDS_LIST'             => 'Список Юр. лиц', // KEY 5.x: LBL_LIST_FORM_TITLE
-	'LBL_ACCOUNT_INFORMATION'      => 'Информация о Юр. лице', 
-	'LBL_SHOW_ACCOUNT_HIERARCHY'   => 'Иерархия Юр. лиц', 
+	'Accounts'                     => 'Контрагенты'      , 
+	'SINGLE_Accounts'              => 'Контрагент'        , 
+	'LBL_ADD_RECORD'               => 'Добавить Контрагента'            , // TODO: Review
+	'LBL_RECORDS_LIST'             => 'Список Контрагентов', // KEY 5.x: LBL_LIST_FORM_TITLE
+	'LBL_ACCOUNT_INFORMATION'      => 'Информация о Контрагенте', 
+	'LBL_SHOW_ACCOUNT_HIERARCHY'   => 'Иерархия Контрагентов', 
 	'industry'                     => 'Отрасль'              , 
-	'Account Name'                 => 'Юр. лицо'        , 
-	'Account No'                   => 'Юр. лицо №'    , 
+	'Account Name'                 => 'Контрагент'        , 
+	'Account No'                   => 'Контрагент №'    , 
 	'Website'                      => 'Веб-сайт'             , 
 	'Ticker Symbol'                => 'Краткое название', 
 	'Member Of'                    => 'Входит в группу', 
