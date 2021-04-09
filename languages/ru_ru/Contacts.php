@@ -17,7 +17,7 @@ $languageStrings = array(
 	'LBL_IMAGE_INFORMATION'        => 'Изображение Клиента', 
 	'LBL_COPY_OTHER_ADDRESS'       => 'Копировать другой адрес', // KEY 5.x: LBL_CPY_OTHER_ADDRESS
 	'LBL_COPY_MAILING_ADDRESS'     => 'Копировать почтовый адрес', // KEY 5.x: LBL_CPY_MAILING_ADDRESS
-	'Office Phone'                 => 'Рабочий тел.'      , 
+	'Office Phone'                 => 'Телефон'      , 
 	'Home Phone'                   => 'Домашний тел.'    ,
     'Mobile Phone'                 => 'Мобильный тел.',
 	'Title'                        => 'Должность'          , 
@@ -56,7 +56,7 @@ $languageStrings = array(
     'Support End Date'             => 'Дата завершения поддержки',
     'LBL_TRANSACTIONS' => 'Операции',
     'Other Phone' => 'Другой тел.',
-    'Email' => 'Основной адрес электронной почты',
+    'Email' => 'Email',
     'Secondary Email' => 'Второй адрес электронной почты',
 );
 $jsLanguageStrings = array(
