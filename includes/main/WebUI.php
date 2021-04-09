@@ -103,6 +103,16 @@ class Vtiger_WebUI extends Vtiger_EntryPoint {
 		// common utils api called, depend on this variable right now
 		$currentUser = $this->getLogin();
 		vglobal('current_user', $currentUser);
+
+		$user_default_module = $currentUser->user_default_module;
+
+        if (empty($user_default_module)) {
+
+            $user_default_module = vglobal('default_module');
+
+        }
+
+		vglobal('user_default_module', $user_default_module);
 		
 		// SalesPlatform.ru begin Check referer setting
 		global $sp_check_site_url;
@@ -158,7 +168,7 @@ class Vtiger_WebUI extends Vtiger_EntryPoint {
 
 			if(empty($module)) {
 				if ($this->hasLogin()) {
-					$defaultModule = vglobal('default_module');
+					$defaultModule = vglobal('user_default_module');
 					$moduleModel = Vtiger_Module_Model::getInstance($defaultModule);
 					if(!empty($defaultModule) && $defaultModule != 'Home' && $moduleModel && $moduleModel->isActive()) {
 						$module = $defaultModule; $qualifiedModuleName = $defaultModule; $view = 'List';

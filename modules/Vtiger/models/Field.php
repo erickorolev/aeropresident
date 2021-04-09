@@ -245,6 +245,30 @@ class Vtiger_Field_Model extends Vtiger_Field {
 		return Vtiger_Base_UIType::getInstanceFromField($this);
 	}
 
+	public function getModulesList(){
+
+        global $adb;
+
+        // vtlib customization: Ignore disabled and Tools modules
+
+        $query = 'select distinct vtiger_tab.tablabel, vtiger_tab.name as tabname from vtiger_tab where (vtiger_tab.presence != 1 and vtiger_tab.parent != "Tools" and vtiger_tab.parent != "")';
+
+ 
+
+        // END
+
+        $result = $adb->pquery($query, array());
+
+        while($row = $adb->fetch_array($result)){
+
+            $modules[$row['tablabel']] = $row['tabname'];
+
+        }
+
+        return $modules;
+
+    }
+
 	public function isRoleBased() {
 		if($this->get('uitype') == '15' || $this->get('uitype') == '33' || ($this->get('uitype') == '55' && $this->getFieldName() == 'salutationtype')) {
 			return true;
@@ -278,6 +302,10 @@ class Vtiger_Field_Model extends Vtiger_Field {
 				$picklistValues = Vtiger_Util_Helper::getRoleBasedPicklistValues($fieldName, $userModel->get('roleid'));
 			}else{
 				$picklistValues = Vtiger_Util_Helper::getPickListValues($fieldName);
+				$fieldName = $this->getName();
+	            if ($fieldName === 'user_default_module'){
+	            $picklistValues = $this->getModulesList();
+	            }
 			}
 			foreach($picklistValues as $value) {
 				$fieldPickListValues[$value] = vtranslate($value,$this->getModuleName());
