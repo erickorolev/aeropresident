@@ -49,8 +49,8 @@ $languageStrings = array(
     'LBL_IMAGE_INFORMATION' => 'Изображение профиля',
     'Organization Image' => 'Изображение организации',
     'Other Phone' => 'Другой тел.',
-    'Phone' => 'Основной телефон',
-    'Email' => 'Основной адрес электронной почты',
+    'Phone' => 'Телефон',
+    'Email' => 'Email',
 );
 $jsLanguageStrings = array(
 	'LBL_RELATED_RECORD_DELETE_CONFIRMATION' => 'Вы уверены, что хотите удалить запись?', // TODO: Review
