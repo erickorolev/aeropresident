@@ -37,22 +37,9 @@
                                     {/foreach}
                                 </select>
                             </div>
-                            {if $TEMPLATE_LANGUAGES|@sizeof > 1}
-                                <br>
-                                <div class="row">
-                                    <h5>{vtranslate('LBL_PDF_LANGUAGE', $MODULE)}</h5>
-                                </div>
-                                <div class="row">
-                                    <select name="template_language" id="template_language" class="col-lg-12">
-                                        {html_options  options=$TEMPLATE_LANGUAGES selected=$CURRENT_LANGUAGE}
-                                    </select>
-                                </div>
-                            {else}
                                 {foreach from=$TEMPLATE_LANGUAGES item="lang" key="lang_key"}
                                     <input type="hidden" name="template_language" id="template_language" value="{$lang_key}"/>
-                                {/foreach}
-                            {/if}
-                        </div>
+                                {/foreach}                        </div>
                     </form>
                 </div>
             </div>
