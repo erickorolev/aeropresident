@@ -9,16 +9,16 @@
  ************************************************************************************/
 
 $languageStrings = array (
-  'LBL_CUSTOM_INFORMATION' => 'Custom Information',
-  'Flights' => 'Flights',
-  'SINGLE_Flights' => 'Flights',
-  'Flights ID' => 'Flights ID',
-  'LBL_FLIGHTS_INFORMATION' => 'Flights Information',
-  'Created Time' => 'Created At',
-  'Modified Time' => 'Modified At',
-  'Modified By' => 'Modified By',
-  'LBL_DESCRIPTION' => 'Description',
-  'LBL_ADD_RECORD' => 'Add Flights',
+  'LBL_CUSTOM_INFORMATION' => 'Заметки пользователя',
+  'Flights' => 'Перелеты',
+  'SINGLE_Flights' => 'Перелет',
+  'Flights ID' => 'ID Перелета',
+  'LBL_FLIGHTS_INFORMATION' => 'Информация о Перелете',
+  'Created Time' => 'Дата создания',
+  'Modified Time' => 'Дата редактирования',
+  'Modified By' => 'Изменено пользователем',
+  'LBL_DESCRIPTION' => 'Описание',
+  'LBL_ADD_RECORD' => 'Добавить перелет',
 );
 
 $jsLanguageStrings = array (
