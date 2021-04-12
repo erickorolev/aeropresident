@@ -72,16 +72,4 @@ class __ModuleName___Module_Model extends Vtiger_Module_Model
 
         return $query;
     }
-    function isActive(){
-        $moduleLinkCreater= Vtiger_Module_Model::getInstance('ModuleLinkCreator');
-        if($moduleLinkCreater && $moduleLinkCreater->isActive()){
-            if($moduleLinkCreater->vteLicense()){
-                return parent::isActive();
-            }else{
-                return false;
-            }
-        }else{
-            return false;
-        }
-    }
 }
