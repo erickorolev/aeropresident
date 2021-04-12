@@ -1,0 +1,70 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>relatedblockslists_settings</name>
+			<sql><![CDATA[CREATE TABLE `relatedblockslists_settings` (
+				`enable`  int(3) NULL DEFAULT NULL 
+				)]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[CREATE TABLE `relatedblockslists_blocks` (
+					`blockid` int(19) NOT NULL AUTO_INCREMENT,
+					`module` varchar(50),
+					`relmodule` varchar(50),
+					`type` varchar(20),
+					`active` int(3),
+					PRIMARY KEY (`blockid`)
+				);]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_fields</name>
+			<sql><![CDATA[CREATE TABLE `relatedblockslists_fields` (
+					`blockid` int(19),
+					`fieldname` varchar(50),
+					`sequence` int(3),
+					PRIMARY KEY (`blockid`, `fieldname`)
+				);]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `after_block` varchar(250) AFTER `active`;]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `limit_per_page` int(3) AFTER `after_block`;]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `expand` int(3) AFTER `limit_per_page`;]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `filterfield` varchar(255) AFTER `expand`;]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `filtervalue` varchar(255) AFTER `filterfield`;]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `sortfield` varchar(255) AFTER `filtervalue`;]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `sorttype` varchar(10) AFTER `sortfield`;]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `sequence` integer AFTER `sorttype`;]]></sql>
+		</table>
+		<table>
+			<name>vte_modules</name>
+			<sql><![CDATA[CREATE TABLE `vte_modules` (
+                `module`  varchar(50) NOT NULL ,
+                `valid`  int(1) NULL ,
+                PRIMARY KEY (`module`));]]></sql>
+		</table>
+	</tables>
+</schema>
