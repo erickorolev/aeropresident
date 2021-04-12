@@ -96,9 +96,9 @@ class Flights extends Vtiger_CRMEntity {
 			// TODO Handle actions after this module is installed.
 			$this->init($moduleName);
 		} else if($eventType == 'module.disabled') {
-			// TODO Handle actions before this module is being uninstalled.
+
 		} else if($eventType == 'module.enabled') {
-			// TODO Handle actions before this module is being uninstalled.
+			$this->addWorkflows();
 		} else if($eventType == 'module.preuninstall') {
 			// TODO Handle actions when this module is about to be deleted.
 		} else if($eventType == 'module.preupdate') {
@@ -222,5 +222,23 @@ class Flights extends Vtiger_CRMEntity {
                 parent::save_related_module($module, $crmid, $with_module, $with_crmid);
             }
         }
+    }
+
+    protected function addWorkflows(): void
+    {
+        global $adb;
+        require 'modules/com_vtiger_workflow/VTEntityMethodManager.inc';
+        $emm = new VTEntityMethodManager($adb);
+        $emm->addEntityMethod("Quotes", "Create Quote From Potential","modules/Flights/workflow/processCreateFromPotential.php", "createFromPotential");
+        $emm->addEntityMethod("SalesOrder", "Create SO From Quote","modules/Flights/workflow/processCreateFromQuote.php", "createFromQuote");
+    }
+
+    protected function removeWorkflows(): void
+    {
+        global $adb;
+        require 'modules/com_vtiger_workflow/VTEntityMethodManager.inc';
+        $emm = new VTEntityMethodManager($adb);
+        $emm->removeEntityMethod("Quotes", "Create Quote From Potential");
+        $emm->removeEntityMethod("SalesOrder", "Create SO From Quote");
     }
 }

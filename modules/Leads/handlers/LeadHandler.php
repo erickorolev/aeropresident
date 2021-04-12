@@ -9,9 +9,22 @@
  * ************************************************************************************/
 
 class LeadHandler extends VTEventHandler {
-
+    /**
+     * @param $eventName
+     * @param VTEntityData $entityData
+     */
 	function handleEvent($eventName, $entityData) {
 		if($eventName === 'vtiger.lead.convertlead'){
+		    $flightModule = Vtiger_Module_Model::getInstance('Flights');
+		    if ($flightModule->isActive()) {
+		        $entityIds = $entityData->entityIds;
+		        if (isset($entityIds['Potentials'])) {
+                    $wsid = $entityIds['Potentials'];
+                    $potentialId = (int) vtws_getCRMEntityId($wsid);
+                    $relModel = new Flights_RelationMoving_Model((int) $entityData->getId(), $potentialId);
+                    $relModel->copy();
+                }
+            }
 		}
 	}
 }
