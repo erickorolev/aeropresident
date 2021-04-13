@@ -65,7 +65,7 @@ class Potentials_DetailView_Model extends Vtiger_DetailView_Model {
 				'linkurl'	=> $recordModel->getCreateSalesOrderUrl(),
 				'linkicon'	=> ''
 			);
-			$linkModelList['DETAILVIEWBASIC'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
+			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
 		}
 
 		$CalendarActionLinks[] = array();

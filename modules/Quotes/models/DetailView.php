@@ -41,7 +41,7 @@ class Quotes_DetailView_Model extends Inventory_DetailView_Model {
 				'linkurl' => $recordModel->getCreateSalesOrderUrl(),
 				'linkicon' => ''
 			);
-			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
+			$linkModelList['DETAILVIEWBASIC'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
 		}
 
 		$purchaseOrderModuleModel = Vtiger_Module_Model::getInstance('PurchaseOrder');
