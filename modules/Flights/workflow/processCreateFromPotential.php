@@ -20,7 +20,7 @@ function createFromPotential($ws_entity){
     $potId = (int) $quoteInstance->get('potential_id');
 
     if($potId) {
-        $relInstance = new Flights_RelationMoving_Model($crmid, $potId, 'cf_quotes_id');
+        $relInstance = new Flights_RelationMoving_Model($potId, $crmid, 'cf_quotes_id');
         $relInstance->copy();
     }
 }
