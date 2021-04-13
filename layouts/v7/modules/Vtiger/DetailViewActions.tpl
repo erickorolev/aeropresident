@@ -14,30 +14,6 @@
         <div class="pull-right btn-toolbar">
             <div class="btn-group">
             {assign var=STARRED value=$RECORD->get('starred')}
-            {if $MODULE_MODEL->isStarredEnabled()}
-                {* SalesPlatform.ru begin *}
-                {* <button class="btn btn-default markStar {if $STARRED} active {/if}" id="starToggle" style="width:100px;">*}
-                <button class="btn btn-default markStar {if $STARRED} active {/if}" id="starToggle" style="width:140px;">
-                {* SalesPlatform.ru end *}
-                    {* SalesPlatform.ru begin *}
-                    {* <div class='starredStatus' title="{vtranslate('LBL_STARRED', $MODULE)}"> *}
-                    <div class='starredStatus' title="{vtranslate('LBL_FOLLOWING', $MODULE)}">    
-                    {* SalesPlatform.ru end *}
-                        <div class='unfollowMessage'>
-                            <i class="fa fa-star-o"></i> &nbsp;{vtranslate('LBL_UNFOLLOW',$MODULE)}
-                        </div>
-                        <div class='followMessage'>
-                            <i class="fa fa-star active"></i> &nbsp;{vtranslate('LBL_FOLLOWING',$MODULE)}
-                        </div>
-                    </div>
-                    {* SalesPlatform.ru begin *}
-                    {* <div class='unstarredStatus' title="{vtranslate('LBL_NOT_STARRED', $MODULE)}"> *}
-                    <div class='unstarredStatus' title="{vtranslate('LBL_NOT_FOLLOWING', $MODULE)}">
-                    {* SalesPlatform.ru end *}
-                        {vtranslate('LBL_FOLLOW',$MODULE)}
-                    </div>
-                </button>
-            {/if}
             {foreach item=DETAIL_VIEW_BASIC_LINK from=$DETAILVIEW_LINKS['DETAILVIEWBASIC']}
                 <button class="btn btn-default" id="{$MODULE_NAME}_detailView_basicAction_{Vtiger_Util_Helper::replaceSpaceWithUnderScores($DETAIL_VIEW_BASIC_LINK->getLabel())}"
                         {if $DETAIL_VIEW_BASIC_LINK->isPageLoadLink()}
