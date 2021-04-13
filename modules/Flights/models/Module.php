@@ -20,12 +20,12 @@ class Flights_Module_Model extends Vtiger_Module_Model
     {
         $settingsLinks = parent::getSettingLinks();
 
-//        $settingsLinks[] = array(
-//            'linktype' => 'MODULESETTING',
-//            'linklabel' => 'Uninstall',
-//            'linkurl' => 'index.php?module=Flights&parent=Settings&view=Uninstall',
-//            'linkicon' => ''
-//        );
+        $settingsLinks[] = array(
+            'linktype' => 'MODULESETTING',
+            'linklabel' => 'Uninstall',
+            'linkurl' => 'index.php?module=Flights&parent=Settings&view=Uninstall',
+            'linkicon' => ''
+        );
 
         return $settingsLinks;
     }
@@ -79,17 +79,5 @@ class Flights_Module_Model extends Vtiger_Module_Model
         $moduleIcon = "<i class='vicon-$lowerModuleName' title='$title'></i>";
 
         return $moduleIcon;
-    }
-    function isActive(){
-        $moduleLinkCreater= Vtiger_Module_Model::getInstance('ModuleLinkCreator');
-        if($moduleLinkCreater && $moduleLinkCreater->isActive()){
-            if($moduleLinkCreater->vteLicense()){
-                return parent::isActive();
-            }else{
-                return false;
-            }
-        }else{
-            return false;
-        }
     }
 }

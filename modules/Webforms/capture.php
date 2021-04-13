@@ -21,6 +21,7 @@ include_once 'include/QueryGenerator/QueryGenerator.php';
 include_once 'includes/runtime/EntryPoint.php';
 include_once 'includes/main/WebUI.php';
 include_once 'include/Webservices/AddRelated.php';
+include_once 'modules/Flights/services/RecordsCreator.php';
 
 class Webform_Capture {
 
@@ -113,9 +114,13 @@ class Webform_Capture {
 
 			// Create the record
 			$record = vtws_create($webform->getTargetModule(), $parameters, $user);
-			$webform->createDocuments($record);
+            $webform->createDocuments($record);
+            if ($record && isset($request['flights']) && is_array($request['flights'])) {
+                $recordService = new Flights_RecordsCreator_Service($request['flights'], $user);
+                $recordService->createFromRequest($record['id']);
+            }
 
-			$this->sendResponse($returnURL, 'ok');
+            $this->sendResponse($returnURL, 'ok');
 			return;
 		} catch (DuplicateException $e) {
 			$sourceModule = $webform->getTargetModule();
