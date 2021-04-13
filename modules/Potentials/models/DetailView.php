@@ -45,7 +45,7 @@ class Potentials_DetailView_Model extends Vtiger_DetailView_Model {
 				'linkurl' => $recordModel->getCreateInvoiceUrl(),
 				'linkicon' => ''
 			);
-			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
+			$linkModelList['DETAILVIEWBASIC'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
 		}
 
 		if($currentUserModel->hasModuleActionPermission($quoteModuleModel->getId(), 'CreateView')) {
@@ -55,7 +55,7 @@ class Potentials_DetailView_Model extends Vtiger_DetailView_Model {
 				'linkurl' => $recordModel->getCreateQuoteUrl(),
 				'linkicon' => ''
 			);
-			$linkModelList['DETAILVIEW'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
+			$linkModelList['DETAILVIEWBASIC'][] = Vtiger_Link_Model::getInstanceFromValues($basicActionLink);
 		}
 
 		if($currentUserModel->hasModuleActionPermission($salesOrderModuleModel ->getId(), 'CreateView')) {
