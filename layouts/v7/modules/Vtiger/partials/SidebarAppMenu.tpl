@@ -27,6 +27,24 @@
 						<span class="app-name textOverflowEllipsis"> {vtranslate('LBL_DASHBOARD',$MODULE)}</span>
 					</div>
 				</div>
+				<div class="menu-item app-item app-item-misc" data-default-url="index.php?module=Leads&view=List">
+					<div class="menu-items-wrapper">
+						<span class="app-icon-list fa fa-users"></span>
+						<span class="app-name textOverflowEllipsis"> {vtranslate('Leads')}</span>
+					</div>
+				</div>
+				<div class="menu-item app-item app-item-misc" data-default-url="index.php?module=Potentials&view=List">
+					<div class="menu-items-wrapper">
+						<span class="app-icon-list fa fa-dot-circle-o"></span>
+						<span class="app-name textOverflowEllipsis"> {vtranslate('Potentials')}</span>
+					</div>
+				</div>
+				<div class="menu-item app-item app-item-misc" data-default-url="index.php?module=Products&view=List">
+					<div class="menu-items-wrapper">
+						<span class="app-icon-list vicon-products"></span>
+						<span class="app-name textOverflowEllipsis"> {vtranslate('Products')}</span>
+					</div>
+				</div>
 			{/if}
 			{assign var=APP_GROUPED_MENU value=Settings_MenuEditor_Module_Model::getAllVisibleModules()}
 			{assign var=APP_LIST value=Vtiger_MenuStructure_Model::getAppMenuList()}
