@@ -80,7 +80,7 @@ class ModuleLinkCreator_Save_Action extends Vtiger_Action_Controller
             $icons = $request->get("data-icon-module");
         }
         $VTEMobileModel = Vtiger_Module_Model::getInstance("VTEMobile");
-        if ($VTEMobileModel) {
+        if ($VTEMobileModel && $VTEMobileModel->isActive()) {
             if ($icons == "") {
                 $icons = "\\e65c";
             }
