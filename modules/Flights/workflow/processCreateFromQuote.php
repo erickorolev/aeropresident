@@ -20,7 +20,7 @@ function createFromQuote($ws_entity){
     $quId = (int) $soInstance->get('quote_id');
 
     if($quId) {
-        $relInstance = new Flights_RelationMoving_Model($crmid, $quId, 'cf_salesorder_id');
+        $relInstance = new Flights_RelationMoving_Model($quId, $crmid, 'cf_salesorder_id');
         $relInstance->copy();
     }
 }
