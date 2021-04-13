@@ -8,7 +8,7 @@
  * All Rights Reserved.
  ************************************************************************************/
 $languageStrings = array(
-	'SINGLE_Quotes'                => 'Предложение'      , 
+	'SINGLE_Quotes'                => 'Предложения'      , 
 	'LBL_EXPORT_TO_PDF'            => 'Экспорт в PDF:'       , 
 	'LBL_SEND_MAIL_PDF'            => 'Отправить PDF по Email:'         , // TODO: Review
 	'LBL_ADD_RECORD'               => 'Добавить Предложение'                   , // TODO: Review
