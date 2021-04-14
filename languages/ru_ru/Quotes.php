@@ -26,7 +26,7 @@ $languageStrings = array(
     //SalesPlatform.ru begin
     'Self Company' => 'Юр. лицо',
     //SalesPlatform.ru end
-    'Quotes'  => 'Предложение' ,
+    'Quotes'  => 'Предложения' ,
     'Related To'  => 'В связи с',
     'LBL_THIS' => 'Это',
     'LBL_IS_DELETED_FROM_THE_SYSTEM_PLEASE_REMOVE_OR_REPLACE_THIS_ITEM' => 'будет удален из системы. Просьба удалить или заменить этот пункт',
