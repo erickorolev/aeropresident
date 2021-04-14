@@ -198,12 +198,20 @@ Vtiger.Class("RelatedBlocksLists_Manager_Js",{
             function(err,data) {
                 app.helper.hideProgress();
                 if(err == null && data) {
-                    app.helper.showSuccessNotification({'message': app.vtranslate('Block Saved')});
-                    var blockid = data.blockid;
-                    var after_block = data.after_block;
-                    var length = true;
-                    thisInstance.loadListBlocks(blockid, after_block,length);
-                    app.helper.hideModal();
+                    resp = data.success;
+                    if(typeof resp !='undefined' && resp!=''){
+                        app.helper.showErrorNotification({'message':data.message});
+                        app.helper.hideModal();
+                    }
+                    else{
+                        app.helper.showSuccessNotification({'message': app.vtranslate('Block Saved')});
+                        var blockid = data.blockid;
+                        var after_block = data.after_block;
+                        var length = true;
+                        thisInstance.loadListBlocks(blockid, after_block,length);
+                        app.helper.hideModal();
+                    }
+
                 }
             }
         );
@@ -275,6 +283,7 @@ Vtiger.Class("RelatedBlocksLists_Manager_Js",{
                     });
 
                     thisInstance.realtedBlockListMakeBlocksListSortable();
+                    thisInstance.realtedBlockListSaveWidthOfFields();
                     var related_block_load_sequence = $('#related_block_load_sequence').val();
                     var next = Number(related_block_load_sequence) + 1;
                     $('#related_block_load_sequence').val(next);
@@ -285,6 +294,47 @@ Vtiger.Class("RelatedBlocksLists_Manager_Js",{
             }
         );
 
+    },
+    realtedBlockListSaveWidthOfFields:function () {
+        jQuery(".enabled_edit_field_width").on('click',function(e){
+            var parent = $(this).closest('div.field-width');
+            parent.find('.vte_related_block_list_field_width').removeAttr('disabled');
+            parent.find('.save_related_block_list_field_width').removeClass('hide');
+            $(this).hide();
+        });
+        jQuery(".save_related_block_list_field_width").on('click',function(e){
+            var parent = $(this).closest('div.field-width');
+            var currentElement = jQuery(e.currentTarget);
+            var field_name = currentElement.data('fieldname');
+            var input_width = parent.find('input.vte_related_block_list_field_width');
+            var block_id = currentElement.closest('div.related-blockSortable').data('related-block-id');
+            var width_value = input_width.val();
+            if(width_value.slice(-2).toUpperCase() != "PX"){
+                if(width_value.slice(-1) != "%") return false;
+            }
+            if(isNaN(parseFloat(width_value.slice(0,-2)))){
+                if(isNaN(parseFloat(width_value.slice(0,-1)))) return false;
+            }
+            var params = {
+                module:"RelatedBlocksLists",
+                action:"ActionAjax",
+                mode:"saveWidthField",
+                field_width: width_value,
+                block_id:block_id,
+                field_name: field_name
+            }
+            app.helper.showProgress();
+            app.request.post({data: params}).then(function (error, data) {
+                if (data) {
+                    app.helper.hideProgress();
+                    params.message = app.vtranslate('Width of field saved successfull');
+                    app.helper.showSuccessNotification(params);
+                    parent.find('.vte_related_block_list_field_width').attr('disabled','disabled');
+                    parent.find('.enabled_edit_field_width').show();
+                    currentElement.hide();
+                }
+            });
+        });
     },
     registerBlockEvents: function (container) {
         var thisInstance = this;

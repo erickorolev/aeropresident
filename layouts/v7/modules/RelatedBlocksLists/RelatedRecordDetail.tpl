@@ -9,8 +9,10 @@
 {strip}
 
     {assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
-    {assign var=IS_MODULE_EDITABLE value=$RELMODULE_MODEL->isPermitted('EditView')}
-    {assign var=IS_MODULE_DELETABLE value=$RELMODULE_MODEL->isPermitted('Delete')}
+    {assign var=CUSTOMIZABLE_OPTIONS value = RelatedBlocksLists_Module_Model::getCustomizableOptionsForBlock($BLOCKID)}
+    {assign var=IS_MODULE_VIEWABLE value= $RELMODULE_MODEL->isPermitted('View') && $CUSTOMIZABLE_OPTIONS->chk_detail_view_icon}
+    {assign var=IS_MODULE_EDITABLE value= $RELMODULE_MODEL->isPermitted('EditView') && $CUSTOMIZABLE_OPTIONS->chk_detail_edit_icon}
+    {assign var=IS_MODULE_DELETABLE value=$RELMODULE_MODEL->isPermitted('Delete')  && $CUSTOMIZABLE_OPTIONS->chk_detail_delete_icon}
     {if $BLOCKTYPE eq 'block'}
         <table class="table detailview-table no-border">
             <tbody>
@@ -81,7 +83,7 @@
                         {/if}
                     </label>
                 </td>
-                <td class="fieldValue {$WIDTHTYPE}" id="{$RELMODULE_NAME}_detailView_fieldValue_{$FIELD_MODEL->getName()}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20'} colspan="" {assign var=COUNTER value=$COUNTER+1} {/if}>
+                <td class="fieldValue {$WIDTHTYPE}" id="{$RELMODULE_NAME}_detailView_fieldValue_{$FIELD_MODEL->getName()}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20'} colspan="" {assign var=COUNTER value=$COUNTER+1} {/if}  data-field-type="{$FIELD_MODEL->getFieldDataType()}" data-field-width="{RelatedBlocksLists_Module_Model::getWidthForField($FIELD_MODEL->getName(),$BLOCKID)}">
                     <span class="value" data-field-type="{$FIELD_MODEL->getFieldDataType()}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20' or $FIELD_MODEL->get('uitype') eq '21'} style="white-space:normal;" {/if}>
                         {if ($RELMODULE_NAME eq 'Calendar' OR $RELMODULE_NAME eq 'Events')
                                 AND ($FIELD_MODEL->getName() == 'date_start' OR $FIELD_MODEL->getName() == 'due_date')}
@@ -134,31 +136,38 @@
                 <a class="relatedBtnEdit pull-right" href="index.php?module={$RELMODULE_NAME}&amp;view=Edit&amp;record={$RELATED_RECORD_MODEL->getId()}&sourceModule={$SOURCE_MODULE}&sourceRecord={$SOURCE_RECORD}&relationOperation=true" style="margin-right:40px; color: #0088cc">{vtranslate('LBL_EDIT')}</a>
                 &nbsp;&nbsp;
             {/if}
-            <a class="relatedBtnView pull-right" target="_blank" href="index.php?module={$RELMODULE_NAME}&amp;view=Detail&amp;record={$RELATED_RECORD_MODEL->getId()}&amp;mode=showDetailViewByMode&amp;requestMode=full" style="margin-right:50px; color: #0088cc">{vtranslate('LBL_VIEW','RelatedBlocksLists')}</a>
+            {if $IS_MODULE_VIEWABLE}
+                <a class="relatedBtnView pull-right" target="_blank" href="index.php?module={$RELMODULE_NAME}&amp;view=Detail&amp;record={$RELATED_RECORD_MODEL->getId()}&amp;mode=showDetailViewByMode&amp;requestMode=full" style="margin-right:50px; color: #0088cc">{vtranslate('LBL_VIEW','RelatedBlocksLists')}</a>
+            {/if}
         </div>
     {else}
-        <td style="width: 5%;" class="fieldValue">
-            <div class="actions pull-left" style="width: 74px;">
-                <span class="actionImages">
-                    <a target="_blank" href="index.php?module={$RELMODULE_NAME}&amp;view=Detail&amp;record={$RELATED_RECORD_MODEL->getId()}&amp;mode=showDetailViewByMode&amp;requestMode=full">
-                        <i class="fa fa-eye icon alignMiddle" title="Complete Details"></i>
-                    </a>&nbsp;&nbsp;
-                    {if $IS_MODULE_EDITABLE}
-                        <a href="index.php?module={$RELMODULE_NAME}&amp;view=Edit&amp;record={$RELATED_RECORD_MODEL->getId()}&sourceModule={$SOURCE_MODULE}&sourceRecord={$SOURCE_RECORD}&relationOperation=true">
-                            <i class="fa fa-pencil alignMiddle" title="Edit"></i>
+        <td  class="fieldValue">
+            {if $IS_MODULE_VIEWABLE || $IS_MODULE_EDITABLE || $IS_MODULE_DELETABLE}
+                <div class="actions pull-left" style="width: {if $IS_MODULE_VIEWABLE && $IS_MODULE_EDITABLE && $IS_MODULE_DELETABLE}60{else}{if ($IS_MODULE_VIEWABLE && $IS_MODULE_EDITABLE) || ($IS_MODULE_VIEWABLE && $IS_MODULE_DELETABLE) || ($IS_MODULE_EDITABLE && $IS_MODULE_DELETABLE)}30{else}15{/if}{/if}px;">
+                    <span class="actionImages">
+                        {if $IS_MODULE_VIEWABLE}
+                            <a target="_blank" href="index.php?module={$RELMODULE_NAME}&amp;view=Detail&amp;record={$RELATED_RECORD_MODEL->getId()}&amp;mode=showDetailViewByMode&amp;requestMode=full">
+                            <i class="fa fa-eye icon alignMiddle" title="Complete Details"></i>
                         </a>&nbsp;&nbsp;
-                    {/if}
-                    {if $IS_MODULE_DELETABLE}
-                        <a class="relatedBtnDelete" data-rel-module="{$RELMODULE_NAME}" data-record-id="{$RELATED_RECORD_MODEL->getId()}"><i class="fa fa-trash alignMiddle" title="Delete"></i></a>
-                    {/if}
-                </span>
-            </div>
+                        {/if}
+                        {if $IS_MODULE_EDITABLE}
+                            <a href="index.php?module={$RELMODULE_NAME}&amp;view=Edit&amp;record={$RELATED_RECORD_MODEL->getId()}&sourceModule={$SOURCE_MODULE}&sourceRecord={$SOURCE_RECORD}&relationOperation=true">
+                                <i class="fa fa-pencil alignMiddle" title="Edit"></i>
+                            </a>&nbsp;&nbsp;
+                        {/if}
+                        {if $IS_MODULE_DELETABLE}
+                            <a class="relatedBtnDelete" data-rel-module="{$RELMODULE_NAME}" data-record-id="{$RELATED_RECORD_MODEL->getId()}"><i class="fa fa-trash alignMiddle" title="Delete"></i></a>
+                        {/if}
+                    </span>
+                </div>
+            {/if}
         </td>
         {foreach item=FIELD_MODEL from=$FIELDS_LIST name=fields_list_data}
             {assign var=FIELD_MODEL value=$FIELD_MODEL->set('fieldvalue',$RELATED_RECORD_MODEL->get($FIELD_MODEL->getFieldName()))}
             {if $FIELD_MODEL->isEditable() eq 'true'}
-                <td class="fieldValue {$WIDTHTYPE}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20'} colspan="" {/if} style="white-space:nowrap;">
-                    <div class="row-fluid">
+                <td class="fieldValue {$WIDTHTYPE}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20'} colspan="" {/if} data-field-type="{$FIELD_MODEL->getFieldDataType()}" data-field-width="{RelatedBlocksLists_Module_Model::getWidthForField($FIELD_MODEL->getName(),$BLOCKID)}" style="white-space:nowrap;">
+                    {assign var=COL_WIDTH value=RelatedBlocksLists_Module_Model::getWidthForField($FIELD_MODEL->getName(),$BLOCKID)}
+                    <div class="row-fluid" style="{if !empty($COL_WIDTH)}width:{$COL_WIDTH}{/if}">
                          <span class="value" data-field-type="{$FIELD_MODEL->getFieldDataType()}" {if $FIELD_MODEL->get('uitype') eq '19' or $FIELD_MODEL->get('uitype') eq '20' or $FIELD_MODEL->get('uitype') eq '21'} style="white-space:normal;" {/if}>
                              {if ($RELMODULE_NAME eq 'Calendar' OR $RELMODULE_NAME eq 'Events')
                                     AND ($FIELD_MODEL->getName() == 'date_start' OR $FIELD_MODEL->getName() == 'due_date')}
@@ -178,7 +187,7 @@
                                  {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getDetailViewTemplateName(),$RELMODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$RELMODULE_NAME RECORD=$RELATED_RECORD_MODEL}
                              {/if}
                          </span>
-                        {if $FIELD_MODEL->isEditable() eq 'true' && ($FIELD_MODEL->getFieldDataType()!=Vtiger_Field_Model::REFERENCE_TYPE)}
+                        {if $FIELD_MODEL->isEditable() eq 'true' && ($FIELD_MODEL->getFieldDataType()!=Vtiger_Field_Model::REFERENCE_TYPE) && $FIELD_MODEL->getFieldDataType()!='documentsFileUpload'}
                             <span class="hide edit">
                                 {if $RELATED_RECORD_MODEL->get('isEvent') eq 1}
                                     {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),'Events') FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$RELMODULE_NAME RECORD_STRUCTURE_MODEL = $RECORD_STRUCTURE_MODEL}
@@ -209,7 +218,11 @@
                                             {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$RELMODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$RELMODULE_NAME RECORD_STRUCTURE_MODEL = $RECORD_STRUCTURE_MODEL}
                                         {/if}
                                     {else}
-                                        {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$RELMODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$RELMODULE_NAME RECORD_STRUCTURE_MODEL = $RECORD_STRUCTURE_MODEL}
+                                        {if $RELMODULE_NAME=='Documents' && $FIELD_MODEL->get('name')=='filename'}
+                                            {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),'RelatedBlocksLists') FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$RELMODULE_NAME RECORD_STRUCTURE_MODEL = $RECORD_STRUCTURE_MODEL}
+                                        {else}
+                                            {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$RELMODULE_NAME) FIELD_MODEL=$FIELD_MODEL USER_MODEL=$USER_MODEL MODULE=$RELMODULE_NAME RECORD_STRUCTURE_MODEL = $RECORD_STRUCTURE_MODEL}
+                                        {/if}
                                     {/if}
                                     {*//TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/2 - END*}
                                 {/if}

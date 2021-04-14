@@ -141,6 +141,66 @@
                         </div>
                     </div>
                 </div>
+                <div class="col-sm-12 col-xs-12 input-group">
+                    <div class="form-group">
+                        <label  class="col-sm-4 control-label fieldLabel">
+                            <strong>{vtranslate('Advanced query box', 'RelatedBlocksLists')}</strong>
+                        </label>
+                        <div class="fieldValue col-lg-7 col-md-7 col-sm-7 input-group">
+                            <textarea name="advanced_query" row="5" style="width: 75%;height: 100px;">{$BLOCK_DATA['advanced_query']}</textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm-12 col-xs-12 input-group">
+                    <div class="form-group" style="width: 100%">
+                        <label  class="col-sm-8 control-label fieldLabel" style="margin-left: 220px;">
+                            <strong>{vtranslate('Customizable options', 'RelatedBlocksLists')}</strong>
+                        </label>
+                    </div>
+                    <hr>
+                    <div class="form-group">
+                        <div class="fieldValue col-lg-3 col-md-3 col-sm-3 input-group">
+                            {assign var=CUSTOMIZABLE_OPTIONS value= $BLOCK_DATA['customizable_options']}
+                            <table style="margin-left: 137px;">
+                                <tr>
+                                    <th style="text-align: right;"><label class="fieldLabel">{vtranslate('Option', 'RelatedBlocksLists')}</label></th>
+                                    <th style="width: 25%;"><label class="fieldLabel">{vtranslate('Detail', 'RelatedBlocksLists')}</label></th>
+                                    <th style="width: 25%;"><label class="fieldLabel">{vtranslate('Edit', 'RelatedBlocksLists')}</label></th>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;"><label class="fieldLabel" style="width: 150px;">{vtranslate('View icon:', 'RelatedBlocksLists')}</label></td>
+                                    <td><input type="checkbox" name="chk_detail_view_icon" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_detail_view_icon eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_detail_view_icon === null}checked{/if}></td>
+                                    <td><input type="checkbox" name="chk_edit_view_icon" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_edit_view_icon eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_edit_view_icon === null}checked{/if}> </td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;"><label class="fieldLabel"  style="width: 150px;">{vtranslate('Edit icon:', 'RelatedBlocksLists')}</label></td>
+                                    <td><input type="checkbox"  name="chk_detail_edit_icon" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_detail_edit_icon eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_detail_edit_icon === null}checked{/if}></td>
+                                    <td><input type="checkbox"  name="chk_edit_edit_icon" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_edit_edit_icon  eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_edit_edit_icon === null}checked{/if}></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;"><label class="fieldLabel"  style="width: 150px;">{vtranslate('Delete icon:', 'RelatedBlocksLists')}</label></td>
+                                    <td><input type="checkbox"  name="chk_detail_delete_icon" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_detail_delete_icon eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_detail_delete_icon === null}checked{/if}></td>
+                                    <td><input type="checkbox"  name="chk_edit_delete_icon" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_edit_delete_icon  eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_edit_delete_icon === null}checked{/if}></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;"><label class="fieldLabel"  style="width: 150px;">{vtranslate('[+Add Reccord] button:', 'RelatedBlocksLists')}</label></td>
+                                    <td><input type="checkbox"  name="chk_detail_add_btn" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_detail_add_btn eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_detail_add_btn === null}checked{/if}></td>
+                                    <td><input type="checkbox"  name="chk_edit_view_add_btn" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_edit_view_add_btn  eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_edit_view_add_btn === null}checked{/if}></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;"><label class="fieldLabel" style="width: 150px;">{vtranslate('[Select Reccord] button:', 'RelatedBlocksLists')}</label></td>
+                                    <td><input type="checkbox"  name="chk_detail_select_btn" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_detail_select_btn eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_detail_select_btn === null}checked{/if}></td>
+                                    <td><input type="checkbox"  name="chk_edit_select_btn" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_edit_select_btn  eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_edit_select_btn === null}checked{/if}></td>
+                                </tr>
+                                <tr>
+                                    <td style="text-align: right;"><label class="fieldLabel"  style="width: 150px;">{vtranslate('In-line Editing:', 'RelatedBlocksLists')}</label></td>
+                                    <td><input type="checkbox"  name="chk_detail_inline_edit" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_detail_inline_edit  eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_detail_inline_edit === null}checked{/if}></td>
+                                    <td><input type="checkbox"  name="chk_edit_inline_edit" class="inputElement" style="margin-left: 15px;margin-bottom: 5px;" {if $CUSTOMIZABLE_OPTIONS ->chk_edit_inline_edit eq 1 || $CUSTOMIZABLE_OPTIONS ->chk_edit_inline_edit === null}checked{/if}></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="modal-footer">

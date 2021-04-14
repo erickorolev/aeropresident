@@ -23,7 +23,7 @@ class RelatedBlocksLists_Activate_Action extends Vtiger_Action_Controller
         global $adb;
         $response = new Vtiger_Response();
         $module = $request->getModule();
-        $adb->pquery("UPDATE `vte_modules` SET `valid`='1' WHERE (`module`=?);", [$module]);
+        $adb->pquery("UPDATE `vte_modules` SET `valid`='1' WHERE (`module`=?);", array($module));
         $response->setResult("success");
         $response->emit();
     }
@@ -34,13 +34,13 @@ class RelatedBlocksLists_Activate_Action extends Vtiger_Action_Controller
         $module = $request->getModule();
         try {
             $vTELicense = new RelatedBlocksLists_VTELicense_Model($module);
-            $data = ["site_url" => $site_URL, "license" => $request->get("license")];
+            $data = array("site_url" => $site_URL, "license" => $request->get("license"));
             $vTELicense->activateLicense($data);
-            $response->setResult(["message" => $vTELicense->message]);
+            $response->setResult(array("message" => $vTELicense->message));
         } catch (Exception $e) {
             $response->setError($e->getCode(), $e->getMessage());
-            $response->emit();
         }
+        $response->emit();
     }
 }
 

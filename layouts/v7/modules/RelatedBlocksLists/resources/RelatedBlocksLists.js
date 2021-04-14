@@ -1,10 +1,5 @@
-/* ********************************************************************************
- * The content of this file is subject to the Related Blocks & Lists ("License");
- * You may not use this file except in compliance with the License
- * The Initial Developer of the Original Code is VTExperts.com
- * Portions created by VTExperts.com. are Copyright(C) VTExperts.com.
- * All Rights Reserved.
- * ****************************************************************************** */
+var global_flag = false;
+var idxItem = 0;
 
 Vtiger.Class("RelatedBlocksLists_Js",{
     ___init: function (url) {
@@ -72,7 +67,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                     record = jQuery(document).find('input[name="record"]').val();
                     //var lastTable = container.find('table.showInlineTable:last');
                 } else{
-                    var record = jQuery("#recordId").val();
+                    record = jQuery("#recordId").val();
                     // var mode = 'generateDetailView';
                     //var lastTable = container.find('table.detailview-table:last');
                 }
@@ -91,6 +86,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                 params['mode'] = 'getConfiguredBlock';
                 params['source_module'] = module;
                 params['customviewid'] = customviewid;
+                params['parent_record'] = record;
                 app.request.post({data:params}).then(
                     function(err,data) {
                         if(err == null) {
@@ -106,6 +102,9 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                                     arrBlockId[after_block].push(blockid);
                                 }else{
                                     arrBlockId[after_block] = [blockid];
+                                }
+                                if(item.blockData[3].length > 2){
+                                    jQuery('[name="picklistDependency"]', container.closest('form')).attr('value',item.blockData[3]);
                                 }
                             });
                             if(blocks) {
@@ -157,21 +156,35 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                                                         return true;
                                                     },
                                                     function () {
-
                                                         btnSave.enable();
                                                         app.helper.hideProgress();
                                                         if (mode == "generateDetailView") {
                                                             if(jQuery('.blockContainer[data-block-id="'+blockid+'"]').length == 0){
                                                                 preBlock.after(data);
-                                                                thisInstance.registerDetailViewEvents(jQuery('div.relatedblockslists' + blockid));
+                                                                var rbl_item = jQuery('div.relatedblockslists' + blockid);
+                                                                thisInstance.registerDetailViewEvents(rbl_item);
+                                                                //hide inline edit when chk_detail_inline_edit = 0
+                                                                var chk_detail_inline_edit = rbl_item.find('.chk_detail_inline_edit').val();
+                                                                if(chk_detail_inline_edit == 0){
+                                                                    rbl_item.find('span.edit').remove();
+                                                                }
                                                             }
                                                         } else {
                                                             preBlock.after(data);
-                                                            thisInstance.registerEditViewEvents(jQuery('div.relatedblockslists' + blockid));
+                                                            var rbl_item = jQuery('div.relatedblockslists' + blockid);
+                                                            thisInstance.registerEditViewEvents(rbl_item);
+                                                            var chk_edit_inline_edit = rbl_item.find('input.chk_edit_inline_edit').val();
+                                                            if(chk_edit_inline_edit == 0){
+                                                                rbl_item.find(':input:not(.relatedBtnAddMore)').attr('disabled',true);
+                                                                //rbl_item.fadeTo('slow', 0.6);
+                                                            }
                                                         }
                                                         thisInstance.registerEventForSelectExistingRecordButton(jQuery('div.relatedblockslists' + blockid));
                                                     }
                                                 );
+                                                if(module!='Calendar'){
+                                                    $('#EditView').vtValidate();
+                                                }
                                             }
                                         }
                                     );
@@ -187,7 +200,6 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             }
         });
     },
-
     registerDetailViewEvents: function (container) {
 
         var thisInstance = this;
@@ -196,10 +208,12 @@ Vtiger.Class("RelatedBlocksLists_Js",{
 
         thisInstance.registerHoverEditEvent(container.find(child));
         thisInstance.registerEventForDeleteButton(container);
+        thisInstance.registerEventShowChildRelatedRecords(container);
         thisInstance.registerEventForDetailAddMoreButton(container);
         jQuery(child, container).each(function(i,e) {
             var basicRow = jQuery(e);
             thisInstance.registerDetailEventForPicklistDependencySetup(basicRow);
+            thisInstance.applyWidthForFields(basicRow,false);
         });
         thisInstance.registerEventForPaging();
     },
@@ -319,7 +333,12 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         var thisInstance = this;
         app.helper.showProgress();
         var view = app.view();
-        if(view == 'Detail'){
+        var query_string = window.location.href.split('?');
+        var array_url = thisInstance.getQueryParams(query_string[1]);
+        var exist_relmodule = array_url.relatedModule;
+        if(typeof exist_relmodule !== "undefined" && exist_relmodule && view == 'Detail'){
+            var mode = 'replaceRelatedBlockLists';
+        }else if(view == 'Detail'){
             var mode = 'generateDetailView';
         }else{
             var mode = 'generateEditView';
@@ -354,6 +373,11 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                     }
                     thisInstance.registerEventForSelectExistingRecordButton(jQuery('div.relatedblockslists' + blockId));
                     app.helper.hideProgress();
+                    var rbl_item = jQuery('div.relatedblockslists' + blockId);
+                    var chk_detail_inline_edit = rbl_item.find('.chk_detail_inline_edit').val();
+                    if(chk_detail_inline_edit == 0){
+                        rbl_item.find('span.edit').remove();
+                    }
                 }
             }
         )
@@ -376,6 +400,8 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             if(view == 'Edit' && baseRecordId == ''){
                 viewMode = 'Edit';
             }
+
+
             var url=element.data('url');
             var blockid=element.data('block-id');
             var block_type=element.data('type');
@@ -473,14 +499,183 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         );
         return aDeferred.promise();
     },
-
-
+    registerEventHilightNewRow:function(selected_records){
+        if(selected_records != undefined && selected_records != ''){
+            selected_records.forEach(function(val){
+                var row = $('tr.flex-list-record[data-id="'+val+'"]');
+                row.css({'background-color':'#ffffd9'});
+                setTimeout(function(){
+                    row.css({'background-color':'#ffffe8'});
+                    setTimeout(function(){
+                        row.css({'background-color':'#fdfdf3'});
+                        setTimeout(function(){
+                            row.css({'background-color':'#fdfdf8'});
+                            setTimeout(function(){
+                                row.css({'background-color':'#ffffff'})
+                            },500);
+                        },500);
+                    },500);
+                },500);
+            });
+        }
+    },
+    reLoadFlexList:function(blockId,record,module,selected_records){
+        var self = this;
+        var actionParams = {
+            "data" : {
+                module: 'RelatedBlocksLists',
+                view: 'MassActionAjax',
+                mode: 'generateDetailView',
+                record: record,
+                blockid: blockId,
+                loadtype: 'reload_flex_list',
+                currently_view: app.getViewName(),
+                source_module: module
+            }
+        };
+        app.request.post(actionParams).then(
+            function(err,data) {
+                var prev = $('.flex-list[data-block-id="'+blockId+'"]').prev();
+                $('.flex-list[data-block-id="'+blockId+'"]').remove();
+                prev.after(data);
+                self.registerEventForFlexList(blockId);
+                self.registerEventHilightNewRow(selected_records);
+            }
+        );
+    },
+    registerFlexListPopupEvent:function(popup,blockId,record,module,relmodule){
+        var self = this;
+        popup.find('button.select').on('click',function(){
+            var tr = popup.find('table.listViewEntriesTable tr.listViewEntries');
+            var selected_records = [];
+            tr.each(function(k,item){
+                var record_id = $(item).data('id');
+                var checkbox = $(item).find('input.entryCheckBox');
+                if(checkbox[0].checked == true){
+                    selected_records.push(record_id);
+                }
+            });
+            self.AddRecordToFlexList(selected_records,blockId,record,module,relmodule);
+        });
+        popup.find('tr.listViewEntries td.listViewEntryValue').on('click',function(){
+            var tr = $(this).closest('tr.listViewEntries');
+            var record_id = tr.data('id');
+            var selected_records = [];
+            selected_records.push(record_id);
+            self.AddRecordToFlexList(selected_records,blockId,record,module,relmodule);
+        });
+    },
+    FlexListOpenModal:function(relmodule,blockId){
+        var self = this;
+        if(app.getViewName() == 'Edit'){
+            var record = $('#EditView').find('input[name="record"]').val();
+        }else{
+            var record = app.getRecordId();
+        }
+        var module = app.getModuleName();
+        var params = {
+            module: 'RelatedBlocksLists',
+            related_module: relmodule,
+            block_type: 'flexlist',
+            src_module: module,
+            src_record: record,
+            multi_select: 1,
+            view: 'PopupFlexList'
+        };
+        var popupInstance = Vtiger_Popup_Js.getInstance();
+        popupInstance.showPopup(params,Vtiger_Edit_Js.popupSelectionEvent,function() {
+            var popup = $('#popupPageContainer');
+            popup.append('<input type="hidden" id="block_type" value="flexlist">');
+            popup.append('<input type="hidden" id="src_module" value="'+module+'">');
+            popup.append('<input type="hidden" id="src_record" value="'+record+'">');
+            popup.append('<input type="hidden" id="related_module" value="'+relmodule+'">');
+            popup.find('input#module[type=""]')
+            popup.find('button.select').removeAttr('disabled');
+            self.registerFlexListPopupEvent(popup,blockId,record,module,relmodule);
+            $(document).ajaxComplete(function(a,b,settings){
+                if(settings.data != undefined && settings.data.indexOf('view=PopupFlexListAjax') != -1){
+                    self.registerFlexListPopupEvent(popup,blockId,record,module,relmodule);
+                }
+            });
+        });
+    },
+    AddRecordToFlexList:function(selected_records,blockId,record,module,relmodule){
+        var self= this;
+        var actionParams = {
+            "data" : {
+                module: 'RelatedBlocksLists',
+                action: 'ActionAjax',
+                selected_records:selected_records,
+                src_record: record,
+                src_module: module,
+                relmodule: relmodule,
+                blockid: blockId,
+                mode: 'addFlexListRecords'
+            }
+        };
+        app.request.post(actionParams).then(function(){
+            app.helper.showSuccessNotification({message:'Selected records have been added'});
+            app.helper.hideModal();
+            self.reLoadFlexList(blockId,record,module,selected_records);
+        });
+    },
+    deleteFlexListRecord:function(rel_record,blockId){
+        var self = this;
+        var actionParams = {
+            "data" : {
+                module: 'RelatedBlocksLists',
+                action: 'ActionAjax',
+                mode: 'deleteFlexListRecord',
+                rel_record: rel_record
+            }
+        };
+        app.helper.showConfirmationBox({message:'Do you want to unlink this record?'}).then(function(){
+            app.request.post(actionParams).then(
+                function(err,data) {
+                    if(err == null && data) {
+                        var module = app.getModuleName();
+                        if(app.getViewName() == 'Edit'){
+                            var record = $('#EditView').find('input[name="record"]').val();
+                        }else{
+                            var record = app.getRecordId();
+                        }
+                        var selected_records = '';
+                        self.reLoadFlexList(blockId,record,module,selected_records);
+                    }
+                }
+            );
+        });
+    },
+    registerEventForFlexList:function(blockId){
+        //#1195383 BEGIN
+        var self = this;
+        $('.fieldBlockContainer .blockContainer[data-block-id="'+blockId+'"]').find('.relatedFlexListAddButton').off('click');
+        $('.fieldBlockContainer .blockContainer[data-block-id="'+blockId+'"]').find('.relatedFlexListAddButton').on('click', function (e) {
+            var relmodule = $(this).data('relmodule');
+            self.FlexListOpenModal(relmodule,blockId);
+        });
+        var table = $('.relatedblockslists_records[data-block-id="'+blockId+'"] table.listViewEntriesTable');
+        $('.relatedblockslists_records[data-block-id="'+blockId+'"] table.listViewEntriesTable tr.relatedRecords .flexlist-module-label').off('click');
+        $('.relatedblockslists_records[data-block-id="'+blockId+'"] table.listViewEntriesTable tr.relatedRecords .flexlist-module-label').on('click', function (e) {
+            var relmodule = $(this).data('relmodule');
+            self.FlexListOpenModal(relmodule,blockId);
+        });
+        $('.relatedblockslists_records[data-block-id="'+blockId+'"] table.listViewEntriesTable tr.relatedRecords .flexlist-delete-record').off('click');
+        $('.relatedblockslists_records[data-block-id="'+blockId+'"] table.listViewEntriesTable tr.relatedRecords .flexlist-delete-record').on('click', function (e) {
+            var rel_record = $(this).data('rel-record-id');
+            self.deleteFlexListRecord(rel_record,blockId);
+        });
+        table.find('tr.relatedRecords span[data-field-type="reference"] a').attr('target','_blank');
+        //#1195383 END
+    },
     // Register event for add more button
     registerEventForDetailAddMoreButton: function (container) {
         var thisInstance = this;
         // Add disable to template row of list
         var relatedRecordsClone = container.find('.relatedRecordsClone');
         relatedRecordsClone.find(':input').attr("disabled","disabled");
+        var blockId=container.data('block-id');
+        thisInstance.registerEventForFlexList(blockId);
         container.find('.relatedBtnAddMore').on('click', function (e) {
             var element = jQuery(e.currentTarget);
             var relatedblockslists = element.closest('.relatedblockslists_records');
@@ -489,6 +684,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             var relModule=element.data('rel-module');
             var currentRowNumber=jQuery('.relatedRecords', relatedblockslists).length;
             var sequenceNumber=currentRowNumber+1;
+            var recordid = $('#recordId').val();
             if(type=='block') {
                 // Generate new block
                 var actionParams = {
@@ -496,6 +692,8 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                         'module':'RelatedBlocksLists',
                         'view': 'MassActionAjax',
                         "relmodule" : relModule,
+                        "parent_module" : app.getModuleName(),
+                        "parent_record" : recordid,
                         "blockid" : blockId,
                         "mode" : 'generateNewBlock',
                         "modeView" : 'Detail',
@@ -505,7 +703,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                     function(err,data) {
                         if(err == null && data) {
                             var newRow=jQuery('<div class="relatedRecords" data-row-no="'+sequenceNumber+'">'+data+'</div>');
-
+                            thisInstance.applyWidthForFields(newRow,true);
                             element.closest('div.relatedAddMoreBtn').before(newRow);
                             // relatedblockslists.find('div.relatedRecords:last').after(newRow)
                             vtUtils.applyFieldElementsView(newRow);
@@ -517,6 +715,14 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                             indexInstance.registerReferenceCreate(newRow);
                             indexInstance.registerAutoCompleteFields(newRow);
                             indexInstance.registerClearReferenceSelectionEvent(newRow);
+                            thisInstance.registerValidateFieldOnChange(newRow);
+                            thisInstance.registerDetailEventForPicklistDependencySetup(newRow);
+                            var container = element.closest('div.relatedblockslists_records');
+                            var chk_detail_inline_edit = container.find('.chk_detail_inline_edit').val();
+                            if(chk_detail_inline_edit == 0){
+                                newRow.find(':input').attr("disabled",true);
+                            }
+                            $('#detailView').vtValidate();
                         }
                     }
                 );
@@ -527,35 +733,12 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                 newRow.find(':input').removeAttr("disabled");
                 //newRow.append('<input type="hidden" name="related_module" value="'+relModule+'"/>');
                 listViewEntriesTable.find('tr:last').after(newRow);
-
-                newRow.find('input,select').each(function (idx,ele) {
-                    if(jQuery(ele).hasClass('input-medium')) {
-                        jQuery(ele).removeClass('input-medium').addClass('input-small');
-                    }else if(jQuery(ele).hasClass('input-large') || jQuery(ele).is('select')) {
-                        jQuery(ele).removeClass('input-large');//.addClass('input-medium');
-                        jQuery(ele).css('width', '190px')
-                    }else if(jQuery(ele).hasClass('dateField')) {
-                        jQuery(ele).css('width', '100%')
-                    }
-                    if($(ele).attr('data-fieldtype') == 'reference'){
-                        var data_fieldname = $(ele).attr('data-fieldname');
-                        var div = $(ele).closest('div.referencefield-wrapper');
-                        div.append('<span class="createReferenceRecord cursorPointer clearfix" title="Create">'+
-                        '<i id="'+relModule+'_editView_fieldName_'+data_fieldname+'_create" class="fa fa-plus"></i>'+
-                        '</span>');
-                    }
-                });
-                newRow.find('textarea').each(function (idx,ele) {
-                    if(jQuery(ele).hasClass('textAreaElement')) {
-                        jQuery(ele).css({width:'200px', height:'74px;'});
-                    }
-                });
-
+                thisInstance.applyWidthForFields(newRow,true);
                 newRow.find(".select2-container.inputElement.select2").remove();
                 vtUtils.applyFieldElementsView(newRow);
 
-                newRow.find(".referencefield-wrapper").css({"width": "300px","display": "inline-block"});
-                newRow.find(".referencefield-wrapper .input-group").css({"width": "229px"});
+                //newRow.find(".referencefield-wrapper").css({"width": "300px","display": "inline-block"});
+                //newRow.find(".referencefield-wrapper .input-group").css({"width": "229px"});
                 thisInstance.registerEventForDeleteButton(newRow);
                 thisInstance.registerEventForDetailSaveButton(newRow);
                 var indexInstance = Vtiger_Index_Js.getInstance();
@@ -563,6 +746,18 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                 indexInstance.registerReferenceCreate(newRow);
                 indexInstance.registerAutoCompleteFields(newRow);
                 indexInstance.registerClearReferenceSelectionEvent(newRow);
+                thisInstance.registerValidateFieldOnChange(newRow);
+                thisInstance.registerDetailEventForPicklistDependencySetup(newRow);
+                var chk_detail_inline_edit = container.find('.chk_detail_inline_edit').val();
+                if(chk_detail_inline_edit == 0){
+                    newRow.find(':input').attr("disabled",true);
+                }
+                //START
+                //TASKID: 1030263 - DEV: tuan@vtexperts.com - DATE: 25/09/2018
+                //NOTES: Fix https://sc.vtedev.com/tuan/Snagit10.mp4
+                newRow.find('.select2-container-disabled').remove();
+                //END
+                $('#detailView').vtValidate();
             }
         });
     },
@@ -571,14 +766,20 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         var thisInstance = this;
         container.on('click','.relatedBtnSave', function (e) {
             var blockId=jQuery(e.currentTarget).data('block-id');
+            var relmodule=jQuery(e.currentTarget).data('rel-module');
             var data = {};
             data['module'] = 'RelatedBlocksLists';
             data['action'] = 'ActionAjax';
             data['mode'] = 'saveRelatedRecord';
             data['blockid'] = blockId;
+            data['parent_module'] = app.getModuleName();
+            data['parent_record'] = jQuery('#recordId').val();
+            data['blockid'] = blockId;
             data['recordid'] = jQuery('#recordId').val();
             var relatedRecords=jQuery(e.currentTarget).closest('.relatedRecords');
             var check = true;
+            var file_data;
+            var file_name;
             relatedRecords.find(':input').each(function(i,e) {
                 if(typeof jQuery(e).attr('name') != 'undefined') {
                     if(jQuery(e).attr('type') == 'checkbox') {
@@ -587,6 +788,11 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                         }else{
                             data[jQuery(e).attr('name')] = 0;
                         }
+                    }else if(jQuery(e).attr('type') == 'file') {
+                        file_data = $(e).prop('files')[0];
+                        file_name = file_data.name;
+                        $('[name=notes_title]').val(file_name);
+
                     }else{
                         data[jQuery(e).attr('name')] = jQuery(e).val();
                     }
@@ -595,33 +801,137 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                     var attr = $(e).attr('data-rule-required');
                     if (typeof attr !== typeof undefined && attr !== false) {
                         if(jQuery(e).val() == '' || jQuery(e).val() == undefined){
-                            check = false;
+                            if(relmodule=='Documents' && jQuery(e).attr('name')=='notes_title'){
+                                check = true;
+                            }else{
+                                check = false;
+                            }
+
                         }
-
                     }
-
                 }
             });
             if(check){
-                app.helper.showProgress();
-                app.request.post({data:data}).then(
-                    function(err,data) {
-                        if(err == null && data) {
-                            app.helper.hideProgress();
-                            var related_record = data.related_record;
+                if(relmodule=='Documents'){
+                    var form_data = new FormData();
+                    $.each(data, function( index, value ) {
+                        if(index=='notes_title' && value==''){
+                            value=file_name;
+                        }
+                        form_data.append(index, value);
+                    });
+                    form_data.append('filename', file_data);
+                    form_data.append('filelocationtype', 'I');
+                    app.helper.showProgress();
+                    $.ajax({
+                        url: 'index.php',
+                        dataType: 'json',
+                        cache: false,
+                        contentType: false,
+                        processData: false,
+                        data: form_data,
+                        type: 'post',
+                        success: function (res) {
+                            var related_record = res.result.related_record;
                             var params = {};
                             params.message = app.vtranslate('Record Saved');
                             app.helper.showSuccessNotification(params);
                             thisInstance.loadRelatedRecordDetail(jQuery('#recordId').val(),related_record, blockId,container);
+                            app.helper.hideProgress();
                         }
-                    }
-                );
+                    });
+                }else{
+                    app.helper.showProgress();
+                    app.request.post({data:data}).then(
+                        function(err,data) {
+                            if(err == null && data) {
+                                app.helper.hideProgress();
+                                var related_record = data.related_record;
+                                var params = {};
+                                params.message = app.vtranslate('Record Saved');
+                                app.helper.showSuccessNotification(params);
+                                thisInstance.loadRelatedRecordDetail(jQuery('#recordId').val(),related_record, blockId,container);
+                            }
+                        }
+                    );
+                }
             }else{
                 app.helper.showAlertNotification({message:'Required fields may not be empty !'});
             }
         });
     },
-
+    registerValidateFieldOnChange:function (newRow) {
+        newRow.find('input,select').on('change',function() {
+            var data_rule_currency = $(this).data('rule-currency');
+            var data_rule_required = $(this).data('rule-required');
+            var field_type =  $(this).closest('td').data('field-type');
+            if (typeof data_rule_currency !== "undefined" && data_rule_currency) {
+                if(jQuery(this).val() != ''){
+                    var check_num = parseFloat(jQuery(this).val());
+                    if(isNaN(check_num) || check_num < 0){
+                        jQuery(this).addClass('input-error');
+                        var errorInfo = app.vtranslate('JS_PLEASE_ENTER_VALID_VALUE');
+                        vtUtils.showValidationMessage(jQuery(this), errorInfo);
+                        return false;
+                    }
+                    else{
+                        vtUtils.hideValidationMessage(jQuery(this));
+                        jQuery(this).removeClass('input-error');
+                    }
+                }
+                else{
+                    vtUtils.hideValidationMessage(jQuery(this));
+                    jQuery(this).removeClass('input-error');
+                }
+            }
+            else if(typeof data_rule_required !== "undefined" && data_rule_required) {
+                if(jQuery(this).val() == ''){
+                    jQuery(this).addClass('input-error');
+                    var errorInfo = app.vtranslate('JS_REQUIRED_FIELD');
+                    vtUtils.showValidationMessage(jQuery(this), errorInfo);
+                    return false;
+                }
+                else{
+                    vtUtils.hideValidationMessage(jQuery(this));
+                    jQuery(this).removeClass('input-error');
+                }
+            }
+            else if(typeof field_type !== "undefined" && (field_type == 'percentage' || field_type == 'double' )) {
+                if(jQuery(this).val() != '' || jQuery(this).val() != undefined){
+                     var check_num = parseFloat(jQuery(this).val());
+                    if(isNaN(check_num)){
+                        jQuery(this).addClass('input-error');
+                        var errorInfo = app.vtranslate('JS_PLEASE_ENTER_VALID_VALUE');
+                        vtUtils.showValidationMessage(jQuery(this), errorInfo);
+                        return false;
+                    }
+                    else{
+                        vtUtils.hideValidationMessage(jQuery(this));
+                        jQuery(this).removeClass('input-error');
+                    }
+                }
+                else{
+                    vtUtils.hideValidationMessage(jQuery(this));
+                    jQuery(this).removeClass('input-error');
+                }
+            }
+            else if(typeof field_type !== "undefined" && field_type == 'integer') {
+                if(jQuery(this).val() != '' || jQuery(this).val() != undefined){
+                    var check_num = parseInt(jQuery(this).val());
+                    if(isNaN(check_num)){
+                        jQuery(this).addClass('input-error');
+                        var errorInfo = app.vtranslate('JS_PLEASE_ENTER_INTEGER_VALUE');
+                        vtUtils.showValidationMessage(jQuery(this), errorInfo);
+                        return false;
+                    }
+                    else{
+                        vtUtils.hideValidationMessage(jQuery(this));
+                        jQuery(this).removeClass('input-error');
+                    }
+                }
+            }
+        });
+    },
     loadRelatedRecordDetail: function (recordId,related_record, blockId, container) {
         //app.helper.showProgress();
         var thisInstance = this;
@@ -674,25 +984,15 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                     if(block_type=='block') {
 
                     }else {
-                        newRow.find('input,select').each(function (idx, ele) {
-                            if (jQuery(ele).hasClass('input-medium')) {
-                                jQuery(ele).removeClass('input-medium').addClass('input-small');
-                            } else if (jQuery(ele).hasClass('input-large') || jQuery(ele).is('select')) {
-                                jQuery(ele).removeClass('input-large');//.addClass('input-medium');
-                                jQuery(ele).css('width', '190px')
-                            } else if (jQuery(ele).hasClass('dateField')) {
-                                jQuery(ele).css('width', '90px')
-                            }
-                        });
-
+                        thisInstance.applyWidthForFields(newRow);
                     }
                     vtUtils.applyFieldElementsView(newRow);
-
                     var indexInstance = Vtiger_Index_Js.getInstance();
                     indexInstance.registerAutoCompleteFields(newRow);
                     thisInstance.registerClearReferenceSelectionEvent(newRow);
                     thisInstance.registerEventForDeleteButton(newRow);
                     thisInstance.updateLineItemsElementWithSequenceNumber(newRow, blockId, sequenceNumber);
+                    thisInstance.registerDetailEventForPicklistDependencySetup(newRow);
                 }
             }
         )
@@ -711,7 +1011,6 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                 'ajax': '1'
             }
         };
-
         app.request.post(viewParams).then(
             function (data) {
                 if (data) {
@@ -725,9 +1024,19 @@ Vtiger.Class("RelatedBlocksLists_Js",{
 
     registerHoverEditEvent: function(container) {
         var thisInstance = this;
-        container.on('click','td.fieldValue', function(e) {
+        container.on('click','td.fieldValue div.row-fluid', function(e) {
+            var target = e.target;
+            if ($(target).is('a')){
+                return true;
+            }
+            $('td.fieldValue .row-fluid').css('width','auto');
             var currentTdElement = jQuery(e.currentTarget);
             thisInstance.ajaxEditHandling(container, currentTdElement);
+            thisInstance.applyWidthForFields(currentTdElement);
+            //#1196020
+            //thisInstance.registerDetailEventForPicklistDependencySetup(currentTdElement.closest('tr'));
+            //#1196020 end
+            thisInstance.registerValidateFieldOnChange(currentTdElement.closest('tr'));
         });
         container.on('click','.hoverEditCancel', function(e) {
             var currentElement = jQuery(e.currentTarget);
@@ -758,11 +1067,16 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             }
             var fieldElement = editElement.find('[name="'+fieldName+'"]');
             var fieldInfo = Vtiger_Field_Js.getInstance(fieldElement.data('fieldinfo'));
-            if(fieldInfo.getType() == 'multipicklist') {
+            if(fieldInfo.getType() == 'multipicklist' ||  fieldElement.data('fieldtype') == 'multipicklist') {
                 var multiPicklistFieldName = fieldName.split('[]');
                 fieldName = multiPicklistFieldName[0];
             }
-            
+            var is_required =  fieldElement.data('rule-required');
+            if(typeof is_required != "undefined" && is_required){
+                if(fieldElement.val() == "") {
+                    return;
+                }
+            }
             var errorExists = fieldElement.validationEngine('validate');
             //If validation fails
             if(errorExists) {
@@ -805,16 +1119,29 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                 function(err,data) {
                     if(err == null) {
                         app.helper.hideProgress();
-                        detailViewValue.html(data[fieldName].display_value);
+                        var contentval = detailViewValue.html();
+                        if(contentval.indexOf('href')>0){
+                            detailViewValue.find('a').html(data[fieldName].display_value);
+                        }else {
+                            var displayVal = data[fieldName].display_value;
+                            if(data[fieldName].colormap !='undefined'){
+                                if(data[fieldName].colormap[displayVal]){
+                                    displayVal ='<span class="picklist-color" style="background-color: '+data[fieldName].colormap[displayVal]+'; line-height:15px; color: white;">'+displayVal+'</span>';
+                                }
+                            }
+                            detailViewValue.html(displayVal);
+                        }
                         editElement.addClass('hide');
                         detailViewValue.removeClass('hide');
                         currentElement.data('selectedValue', fldValue);
                         //After saving source field value, If Target field value need to change by user, show the edit view of target field.
                         if(thisInstance.targetPicklistChange) {
-                            thisInstance.targetPicklist.trigger('click');
-                            thisInstance.targetPicklistChange = false;
-                            thisInstance.targetPicklist = false;
+                            // thisInstance.targetPicklist.trigger('click');
+                            // thisInstance.targetPicklistChange = false;
+                            // thisInstance.targetPicklist = false;
                         }
+                        vtUtils.hideValidationMessage(fieldElement);
+                        jQuery(this).removeClass('input-error');
                         e.stopPropagation();
                     } else {
                         app.helper.hideProgress();
@@ -838,118 +1165,266 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         detailViewValue.addClass('hide');
         editElement.removeClass('hide').show();
     },
-
-
     registerDetailEventForPicklistDependencySetup: function(container) {
         var thisInstance = this;
         var picklistDependcyElemnt = jQuery('[name="picklistDependency"]', container.closest('form'));
+        if (picklistDependcyElemnt.length <= 0) {
+            var eleRelatedBlock = container.closest('div.relatedblockslists_records');
+            picklistDependcyElemnt = jQuery('[name="picklistDependency"]', eleRelatedBlock);
+        }
         if (picklistDependcyElemnt.length <= 0) {
             return;
         }
         var picklistDependencyMapping = JSON.parse(picklistDependcyElemnt.val());
         var sourcePicklists = Object.keys(picklistDependencyMapping);
+
         if (sourcePicklists.length <= 0) {
             return;
         }
 
         var sourcePickListNames = "";
+        var view = app.getViewName();
+        var relmodule = container.closest('div.relatedblockslists_records').data('rel-module');
         for (var i = 0; i < sourcePicklists.length; i++) {
-            sourcePickListNames += '[name="' + sourcePicklists[i] + '"],';
+            if(view == "Edit"){
+                sourcePickListNames += '[data-fieldname="' + relmodule+"_" + sourcePicklists[i] + '"],';
+            }
+            else sourcePickListNames += '[name="' + sourcePicklists[i] + '"],';
         }
         sourcePickListNames = sourcePickListNames.substring(0, sourcePickListNames.length - 1);
         var sourcePickListElements = container.find(sourcePickListNames);
-        sourcePickListElements.on('change', function(e) {
-            var currentElement = jQuery(e.currentTarget);
-            var sourcePicklistname = currentElement.attr('name');
+        if(sourcePickListElements.length > 0 && !sourcePickListElements.closest('tr').hasClass('relatedRecordsClone')){
+                sourcePickListElements.on('change', function(e) {
+                    var currentElement = jQuery(e.currentTarget);
+                    var sourcePicklistname = currentElement.attr('name');
+                    if(view == "Edit"){
+                        sourcePicklistname = currentElement.data('fieldname');
+                    }
+                    sourcePicklistname = sourcePicklistname.replace(relmodule + "_","");
+                    var configuredDependencyObject = picklistDependencyMapping[sourcePicklistname];
+                    if(typeof configuredDependencyObject !== "undefined"){
+                        var selectedValue = currentElement.val();
+                        var targetObjectForSelectedSourceValue = configuredDependencyObject[selectedValue];
+                        var picklistmap = configuredDependencyObject["__DEFAULT__"];
+                        if (typeof targetObjectForSelectedSourceValue == 'undefined') {
+                            targetObjectForSelectedSourceValue = picklistmap;
+                        }
+                        jQuery.each(picklistmap, function(targetPickListName, targetPickListValues) {
+                            var targetPickListMap = targetObjectForSelectedSourceValue[targetPickListName];
+                            if (typeof targetPickListMap == "undefined") {
+                                targetPickListMap = targetPickListValues;
+                            }
+                            var targetPickList = jQuery('[name="' + targetPickListName + '"]', container);
+                            if(view == "Edit"){
+                                targetPickList = jQuery('[data-fieldname="' + relmodule + "_" + targetPickListName + '"]', container);
+                            }
+                            if (targetPickList.length <= 0) {
+                                return;
+                            }
 
-            var configuredDependencyObject = picklistDependencyMapping[sourcePicklistname];
-            var selectedValue = currentElement.val();
-            var targetObjectForSelectedSourceValue = configuredDependencyObject[selectedValue];
-            var picklistmap = configuredDependencyObject["__DEFAULT__"];
+                            //#1659840 tuannm 06192019 START
+                            var targetSourceValue = configuredDependencyObject[selectedValue];
+                            if(typeof targetSourceValue != 'undefined' && Object.keys(picklistmap).length>1){
+                                jQuery('[name="picklistmapfield"]', eleRelatedBlock).val(JSON.stringify(targetSourceValue));
+                            }
 
-            if (typeof targetObjectForSelectedSourceValue == 'undefined') {
-                targetObjectForSelectedSourceValue = picklistmap;
-            }
-            jQuery.each(picklistmap, function(targetPickListName, targetPickListValues) {
-                var targetPickListMap = targetObjectForSelectedSourceValue[targetPickListName];
-                if (typeof targetPickListMap == "undefined") {
-                    targetPickListMap = targetPickListValues;
-                }
-                var targetPickList = jQuery('[name="' + targetPickListName + '"]', container);
-                if (targetPickList.length <= 0) {
-                    return;
-                }
+                            var optionsTargetPickList = jQuery('[name="picklistmapfield"]', eleRelatedBlock).val();
+                            var arrPickListValues=[];
+                            var arrtargetPickList=[];
+                            if(optionsTargetPickList !=''){
+                                arrPickListValues = JSON.parse(optionsTargetPickList);
+                                arrtargetPickList = arrPickListValues[targetPickListName];
+                            }
+                            //#1659840 tuannm 06192019 END
 
-                thisInstance.targetPicklistChange = true;
-                thisInstance.targetPicklist = targetPickList.closest('td');
+                            thisInstance.targetPicklistChange = true;
+                            thisInstance.targetPicklist = targetPickList.closest('td');
 
-                var listOfAvailableOptions = targetPickList.data('availableOptions');
-                if (typeof listOfAvailableOptions == "undefined") {
-                    listOfAvailableOptions = jQuery('option', targetPickList);
-                    targetPickList.data('available-options', listOfAvailableOptions);
-                }
+                            var listOfAvailableOptions = targetPickList.data('availableOptions');
+                            if (typeof listOfAvailableOptions == "undefined") {
+                                listOfAvailableOptions = jQuery('option', targetPickList);
+                                targetPickList.data('available-options', listOfAvailableOptions);
+                            }
+                            var targetOptions = new jQuery();
 
-                var targetOptions = new jQuery();
-                var optionSelector = [];
-                optionSelector.push('');
-                for (var i = 0; i < targetPickListMap.length; i++) {
-                    optionSelector.push(targetPickListMap[i]);
-                }
-
-                jQuery.each(listOfAvailableOptions, function(i, e) {
-                    var picklistValue = jQuery(e).val();
-                    if (jQuery.inArray(picklistValue, optionSelector) != -1) {
-                        targetOptions = targetOptions.add(jQuery(e));
+                            var optionSelector = [];
+                            optionSelector.push('');
+                            //#1659840 tuannm 06192019 START
+                            for (var i = 0; i < targetPickListMap.length; i++) {
+                                if(typeof arrtargetPickList !='undefined' && arrtargetPickList.length>0){
+                                    if(jQuery.inArray(targetPickListMap[i], arrtargetPickList) != -1) {
+                                        optionSelector.push(targetPickListMap[i]);
+                                    }
+                                }else {
+                                    optionSelector.push(targetPickListMap[i]);
+                                }
+                            }
+                            //#1659840 tuannm 06192019 END
+                            var existed_index = [];
+                            jQuery.each(listOfAvailableOptions, function(i, e) {
+                                var picklistValue = jQuery(e).val();
+                                if (jQuery.inArray(picklistValue, optionSelector) !== -1 && jQuery.inArray(picklistValue,existed_index) === -1) {
+                                    targetOptions = targetOptions.add(jQuery(e));
+                                    existed_index.push(picklistValue);
+                                }
+                            });
+                            var targetPickListSelectedValue = '';
+                            targetPickListSelectedValue = targetOptions.filter('[selected]').val();
+                            if (targetPickListMap.length == 1) {
+                                targetPickListSelectedValue = targetPickListMap[0]; // to automatically select picklist if only one picklistmap is present.
+                            }
+                            else{1
+                                targetPickListSelectedValue = "";
+                            }
+                            targetPickList.html(targetOptions).val(targetPickListSelectedValue).trigger("liszt:updated");
+                        });
                     }
                 });
-                var targetPickListSelectedValue = '';
-                targetPickListSelectedValue = targetOptions.filter('[selected]').val();
-                if (targetPickListMap.length == 1) {
-                    targetPickListSelectedValue = targetPickListMap[0]; // to automatically select picklist if only one picklistmap is present.
-                }
-                targetPickList.html(targetOptions).val(targetPickListSelectedValue).trigger("change");
-            })
-
-        });
-        //To Trigger the change on load
-        sourcePickListElements.trigger('change');
+                //To Trigger the change on load
+                sourcePickListElements.trigger('change');
+         }
     },
 
     registerEditViewEvents: function (container) {
         var thisInstance = this;
+        var type = container.closest('.fieldBlockContainer').data('block-type');
+        if(type != 'flexlist'){
+            // Update width of input in related list
+            var listViewEntriesTable = container.find('.listViewEntriesTable');
+            if(listViewEntriesTable.length == 0) listViewEntriesTable = container.find('.relatedRecords');
+            thisInstance.applyWidthForFields(listViewEntriesTable);
+            vtUtils.applyFieldElementsView(container.find('.relatedRecords'));
+            thisInstance.registerEventForAddMoreButton(container);
+            thisInstance.registerEventForDeleteButton(container);
+            thisInstance.registerEventShowChildRelatedRecords(container);
+            thisInstance.updateRelatedRecordsFieldsInfo(container);
+            thisInstance.registerClearReferenceSelectionEvent(container);
+            thisInstance.registerEventForPaging();
+            container.find('.relatedRecords').each(function (idx,ele) {
+                thisInstance.registerDetailEventForPicklistDependencySetup(jQuery(ele));
+                thisInstance.registerValidateFieldOnChange(jQuery(ele));
+            });
 
-        // Update width of input in related list
-        var listViewEntriesTable = container.find('.listViewEntriesTable');
-        listViewEntriesTable.find('input,select').each(function (idx,ele) {
-            if(jQuery(ele).hasClass('input-medium')) {
-                jQuery(ele).removeClass('input-medium').addClass('input-small');
-            }else if(jQuery(ele).hasClass('input-large') || jQuery(ele).is('select')) {
-                jQuery(ele).removeClass('input-large');//.addClass('input-medium');
-                jQuery(ele).css('width', '190px')
-            }else if(jQuery(ele).hasClass('dateField')) {
-                jQuery(ele).css('width', '100%')
+            thisInstance.registerSubmitEvent(container);
+            //thisInstance.registerEventForSelectExistingRecordButton(container);
+        }else{
+            var blockId = container.data('block-id');
+            thisInstance.registerEventForFlexList(blockId);
+        }
+    },
+    applyWidthForFields: function (listViewEntriesTable,is_new) {
+        listViewEntriesTable.find('input:not(:checkbox):not(:radio),select').each(function (idx,ele) {
+            var parent_td = jQuery(ele).closest('td');
+            //parent_td.closest('table').find('th').css('width', 'auto');
+            parent_td.closest('table').find('th').each(function (i,e) {
+                if(i > 0) jQuery(e).css('width', 'auto');
+                });
+            var field_width_config = parent_td.data('field-width');
+            var parent_div = parent_td.find('div.input-group');
+
+            if(field_width_config){
+                if(parent_div.length > 0){
+                    parent_div.removeClass('input-group');
+                    parent_div.css('min-width', field_width_config);
+                    parent_div.css('float', 'left');
+                    parent_div.css('position', 'relative');
+                    parent_div.css('display', 'table');
+                    parent_div.css('border-collapse', 'separate');
+                    parent_div.css('width', field_width_config);
+                }
+                var referencefield_div = $(ele).closest('div.referencefield-wrapper');
+                if(referencefield_div.length > 0){
+                    referencefield_div.attr('style','width:' + field_width_config+';');
+                }
+                if(is_new){
+                    parent_td.attr('style','width:' + field_width_config+';');
+                }
+                var data_type = parent_td.data('field-type');
+                var view = app.getViewName();
+                if(data_type == "multipicklist" && view == "Detail"){
+                    parent_td.find('select.select2').select2({ width: field_width_config });
+                    if(is_new) parent_td.find('div.select2-container').css({ display: 'none' });
+                }
+                if(view == "Detail"){
+                    parent_td.find('div.row-fluid').find('span.value').css('width', field_width_config);
+                }
+                jQuery(ele).css('width', field_width_config);
+                //th.css('width', field_width_config);
+            }
+            else {
+                if(jQuery(ele).hasClass('input-medium')) {
+                    jQuery(ele).removeClass('input-medium').addClass('input-small');
+                }else if(jQuery(ele).hasClass('input-large') || jQuery(ele).is('select')) {
+                    jQuery(ele).removeClass('input-large');//.addClass('input-medium');
+                    jQuery(ele).css('width', '190px')
+                }else if(jQuery(ele).hasClass('dateField')) {
+                    jQuery(ele).css('width', '100%')
+                }
             }
         });
+        listViewEntriesTable.find('td.fieldValue').each(function (idx,ele) {
+            var td_width = jQuery(ele).data('field-width');
+            jQuery(ele).css('width', td_width);
+            jQuery(ele).find('div:first').css('width', td_width);
+        });
         listViewEntriesTable.find('textarea').each(function (idx,ele) {
-            if(jQuery(ele).hasClass('textAreaElement')) {
+            var field_width_config = jQuery(ele).closest('td').data('field-width');
+            if(field_width_config){
+                jQuery(ele).css('width', field_width_config);
+                jQuery(ele).css('max-width', field_width_config);
+                var view = app.getViewName();
+                if(view == "Detail"){
+                    var parent_td = jQuery(ele).closest('td');
+                    parent_td.find('div.row-fluid').find('span.value').css('width', field_width_config);
+                }
+            }
+            else if(jQuery(ele).hasClass('textAreaElement')) {
                 jQuery(ele).css({width : '200px',height : '74px'})
             }
         });
-
-        vtUtils.applyFieldElementsView(container.find('.relatedRecords'));
-        thisInstance.registerEventForAddMoreButton(container);
-        thisInstance.registerEventForDeleteButton(container);
-        thisInstance.updateRelatedRecordsFieldsInfo(container);
-        thisInstance.registerClearReferenceSelectionEvent(container);
-        thisInstance.registerEventForPaging();
-        //thisInstance.registerSubmitEvent(container);
-        //thisInstance.registerEventForSelectExistingRecordButton(container);
-
     },
-
     registerSubmitEvent: function(container) {
         var form=jQuery('#EditView');
         form.submit(function(e){
+            // by Pham for fix issue could not save unit_price when enable module
+            // https://crm.vtedev.com/index.php?module=ProjectTask&view=Detail&record=1547449&app=PROJECT
+            var field = $('[name="unit_price"]');
+            if(field.length >0) {
+                var unit_price = field.val();
+                if(unit_price == ''){
+                    unit_price = 0;
+                }else{
+                    var fieldData = field.data();
+                    //As replace is doing replace of single occurence and using regex
+                    //replace has a problem with meta characters  like (.,$),so using split and join
+                    var strippedValue = unit_price.split(fieldData.groupSeparator);
+                    strippedValue = strippedValue.join("");
+                    strippedValue = strippedValue.replace(fieldData.decimalSeparator, '.');
+                    unit_price = strippedValue;
+                }
+                if(unit_price > 0){
+                    var base_currency = $('[name="base_currency"]').val();
+                    $('[name="'+base_currency+'"]').val(unit_price);
+                    var curr_id = base_currency.replace("curname","");
+                    var cur_conv_rate = "cur_conv_rate"+curr_id;
+                    if($('[name="'+cur_conv_rate+'"]').length == 0){
+                        $('<input>', {
+                            type: 'hidden',
+                            name: cur_conv_rate,
+                            value: curr_id
+                        }).appendTo('#EditView');
+                    }
+                    if($('[name="base_currency_input"]').length == 0){
+                        $('<input>', {
+                            type: 'hidden',
+                            name: 'base_currency_input',
+                            value: base_currency
+                        }).appendTo('#EditView');
+                    }
+                }
+            }
+
+            //End
             container.find('.relatedRecordsClone').remove();
         });
     },
@@ -965,17 +1440,12 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             relatedblockslists.find('.relatedRecords').each(function (idx,el) {
                 var relatedRecord = jQuery(el);
                 var rowNo=relatedRecord.data('row-no');
-                var moduleName=jQuery('input[name="relatedblockslists['+blockId+']['+rowNo+'][module]"]').val();
                 var arrFields=selected_fields.split(',');
                 for(var idIndex in arrFields ) {
                     var elementName = arrFields[idIndex];
                     if(multipicklist_fields.indexOf(elementName) != -1) {
                         var expectedElementId = 'relatedblockslists['+blockId+']['+rowNo+']['+elementName+'][]';
-                        //TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/6 - START
-                        //NOTE: get name select tag of multipicklist
-                        var multipicklist=elementName.replace(moduleName+'_','');
-                        // elementName = elementName+'[]';
-                        //TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/6 - END
+                        elementName = elementName+'[]';
                     }else{
                         var expectedElementId = 'relatedblockslists['+blockId+']['+rowNo+']['+elementName+']';
                         if(reference_fields.indexOf(elementName) != -1) {
@@ -986,16 +1456,10 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                                 .filter('[name="' + elementName + '_display"]').attr('name', expectedElementId+'_display');
                         }
                     }
-                    //TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/6 - START
-                    //NOTE: support ACF multipicklist field
-                    if(multipicklist){
-                        var selectElement=relatedRecord.find('[name="'+multipicklist+'[]"]');
-                        selectElement.attr('id', 'relatedblockslists_'+blockId+"_"+rowNo+"_"+elementName).attr('name', expectedElementId)
-                            .data('fieldname',elementName);
-                    }
-                    //TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/6 - END
-                    var inputElement=relatedRecord.find('[name="' + elementName + '"]').attr('id', 'relatedblockslists_'+blockId+"_"+rowNo+"_"+elementName)
-                        .filter('[name="' + elementName + '"]').attr('name', expectedElementId)
+                    var arr_elementName = RegExp(/_(.*)/).exec(elementName);
+                    var inputElement=relatedRecord.find('[name="' + elementName + '"]');
+                    if(inputElement.length == 0) inputElement=relatedRecord.find('[name="' + arr_elementName[1] + '"]');
+                    inputElement.attr('id', 'relatedblockslists_'+blockId+"_"+rowNo+"_"+elementName).attr('name', expectedElementId)
                         .data('fieldname',elementName);
                 }
                 thisInstance.registerEventForPicklistDependencySetup(relatedRecord,rowNo,blockId);
@@ -1030,6 +1494,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         var sourcePickListElements = container.find(sourcePickListNames);
 
         sourcePickListElements.on('change',function(e){
+
             var currentElement = jQuery(e.currentTarget);
             var sourcePicklistname = currentElement.data('fieldname');
 
@@ -1086,6 +1551,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
     // Register event for add more button
     registerEventForAddMoreButton: function (container) {
         var thisInstance = this;
+        var process_container = container;
         container.find('.relatedBtnAddMore').on('click', function (e) {
             var element = jQuery(e.currentTarget);
             var relatedblockslists = element.closest('.relatedblockslists_records');
@@ -1094,6 +1560,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             var relModule=element.data('rel-module');
             var currentRowNumber=jQuery('.relatedRecords', relatedblockslists).length;
             var sequenceNumber=currentRowNumber+1;
+            var recordid = $('[name="record"],[name="recordid"]').val();
             if(type=='block') {
                 // Generate new block
                 var actionParams = {
@@ -1102,6 +1569,8 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                         "view": "MassActionAjax",
                         "relmodule" : relModule,
                         "blockid" : blockId,
+                        "parent_module" : app.getModuleName(),
+                        "parent_record" : recordid,
                         "mode" : 'generateNewBlock'
                     }
                 };
@@ -1109,7 +1578,9 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                     function(err,data) {
                         if(err == null && data) {
                             var newRow=jQuery('<div class="relatedRecords" data-row-no="'+sequenceNumber+'"><input type="hidden" name="relatedblockslists['+blockId+']['+sequenceNumber+'][module]" value="'+relModule+'"/>'+data+'</div>');
+
                             element.closest('div.row').before(newRow);
+                            //thisInstance.applyWidthForFields(newRow);
                             //relatedblockslists.find('div.relatedRecords:last').after(newRow);
 
                             thisInstance.updateLineItemsElementWithSequenceNumber(newRow,blockId,sequenceNumber);
@@ -1117,35 +1588,46 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                             thisInstance.registerEventForDeleteButton(newRow);
                             var indexInstance = Vtiger_Index_Js.getInstance();
                             indexInstance.referenceModulePopupRegisterEvent(newRow);
-                            indexInstance.registerReferenceCreate(newRow);
+                            // indexInstance.registerReferenceCreate(newRow);
                             indexInstance.registerAutoCompleteFields(newRow);
                             thisInstance.registerClearReferenceSelectionEvent(newRow);
+                            thisInstance.registerValidateFieldOnChange(newRow);
+                            var container = $(newRow).closest('.relatedblockslists_records');
+                            thisInstance.updateRelatedRecordsFieldsInfo(container);
+                            var container = element.closest('div.relatedblockslists_records');
+                            var chk_edit_inline_edit = container.find('.chk_edit_inline_edit').val();
+                            if(chk_edit_inline_edit == 0){
+                                newRow.find(':input').attr("disabled",true);
+                            }
+                            $('#EditView').vtValidate();
+                            $('input[type="text"]').on('change',function(){$(this).focus();$(this).blur()})
+                            thisInstance.applyWidthForFields(newRow,true);
                         }
                     }
                 );
             } else {
-                var listViewEntriesTable=container.find('table.listViewEntriesTable');
-                var newRow = thisInstance.getBasicRow(container).addClass('relatedRecords');
+                var listViewEntriesTable=process_container.find('table.listViewEntriesTable');
+                var newRow = thisInstance.getBasicRow(process_container).addClass('relatedRecords');
                 newRow.append('<input type="hidden" name="relatedblockslists['+blockId+']['+sequenceNumber+'][module]" value="'+relModule+'"/>');
                 listViewEntriesTable.find('tr:last').after(newRow);
-                newRow.find('input,select').each(function (idx,ele) {
-                    if(jQuery(ele).hasClass('input-medium')) {
-                        jQuery(ele).removeClass('input-medium').addClass('input-small');
-                    }else if(jQuery(ele).hasClass('input-large') || jQuery(ele).is('select')) {
-                        jQuery(ele).removeClass('input-large');//.addClass('input-medium');
-                        jQuery(ele).css('width', '190px')
-                    }else if(jQuery(ele).hasClass('dateField')) {
-                        jQuery(ele).css('width', '100%')
-                    }
-                });
                 thisInstance.updateLineItemsElementWithSequenceNumber(newRow,blockId,sequenceNumber);
                 vtUtils.applyFieldElementsView(newRow);
                 thisInstance.registerEventForDeleteButton(newRow);
                 var indexInstance = Vtiger_Index_Js.getInstance();
                 indexInstance.referenceModulePopupRegisterEvent(newRow);
-                indexInstance.registerReferenceCreate(newRow);
+                // indexInstance.registerReferenceCreate(newRow);
                 indexInstance.registerAutoCompleteFields(newRow);
                 thisInstance.registerClearReferenceSelectionEvent(newRow);
+                thisInstance.registerValidateFieldOnChange(newRow);
+                thisInstance.registerDetailEventForPicklistDependencySetup(newRow);
+                var new_container = element.closest('div.relatedblockslists_records');
+                var chk_edit_inline_edit = new_container.find('.chk_edit_inline_edit').val();
+                if(chk_edit_inline_edit == 0){
+                    newRow.find(':input').attr("disabled",true);
+                }
+                $('#EditView').vtValidate();
+                $('input[type="text"]').on('change',function(){$(this).focus();$(this).blur()});
+                thisInstance.applyWidthForFields(newRow,true);
             }
         });
     },
@@ -1181,18 +1663,13 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             var multipicklist_fields= jQuery('#multipicklist_fields'+id).val();
             var reference_fields= jQuery('#reference_fields'+id).val();
             var arrFields=selected_fields.split(',');
-            var moduleName=jQuery('input[name="relatedblockslists['+id+']['+expectedSequenceNumber+'][module]"]').val();
             for(var idIndex in arrFields ) {
                 var elementName = arrFields[idIndex];
                 if (elementName != '') {
                     var actualElementName = elementName;
                     if(multipicklist_fields.indexOf(elementName) != -1) {
                         var expectedElementId = 'relatedblockslists['+id+']['+expectedSequenceNumber+']['+elementName+'][]';
-                        //TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/6 - START
-                        //NOTE: get name select tag of multipicklist
-                        var multipicklist=elementName.replace(moduleName+'_','');
-                        // actualElementName = actualElementName+'[]';
-                        //TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/6 - END
+                        actualElementName = actualElementName+'[]';
                     }else{
                         var expectedElementId = 'relatedblockslists['+id+']['+expectedSequenceNumber+']['+elementName+']';
                         if(reference_fields.indexOf(elementName) != -1) {
@@ -1213,14 +1690,8 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                             }
                         }
                     }
-                    //TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/6 - START
-                    //NOTE: support ACF multipicklist field
-                    if(multipicklist){
-                        var selectElement=lineItemRow.find('[name="'+multipicklist+'[]"]');
-                        selectElement.attr('id', 'relatedblockslists_'+id+"_"+expectedSequenceNumber+"_"+elementName).attr('name', expectedElementId)
-                            .data('fieldname',elementName);
-                    }
-                    //TASKID: 1083447 - DEV: tiennguyen - DATE: 2018/11/6 - END
+
+
                     var expectedRowId = 'row'+expectedSequenceNumber;
                     lineItemRow.find('[name="' + actualElementName + '"]').attr('id', 'relatedblockslists_'+id+"_"+expectedSequenceNumber+"_"+elementName)
                         .filter('[name="' + actualElementName + '"]').attr('name', expectedElementId)
@@ -1359,7 +1830,6 @@ Vtiger.Class("RelatedBlocksLists_Js",{
 
         var selectedName = params.name;
         var id = params.id;
-
         fieldElement.val(id);
         fieldDisplayElement.val(selectedName).attr('readonly',true).attr("disabled","disabled");
         fieldElement.trigger(Vtiger_Edit_Js.referenceSelectionEvent, {'source_module' : popupReferenceModule, 'record' : id, 'selectedName' : selectedName});
@@ -1378,7 +1848,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         var button = container.find('.relatedBtnDelete');
         // 
         button.unbind().click(function(e) {
-        //container.on('click','.relatedBtnDelete',function(e){
+            //container.on('click','.relatedBtnDelete',function(e){
             var element = jQuery(e.currentTarget);
             var src_record =jQuery('[name="record"]').val();
             if(src_record == undefined){
@@ -1392,6 +1862,9 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                     message: deleteMessage
                 }).then(function () {
                     var relModule = element.data('rel-module');
+                    if(relModule=="Events"){
+                        relModule='Calendar';
+                    }
                     var params = {};
                     params.action = 'RelationAjax';
                     params.mode = 'deleteRelation';
@@ -1405,7 +1878,11 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                             var blockId =  headerContainer.data('block-id');
                             var page = headerContainer.find('.listViewPageJump').data('page-number');
                             element.closest('.relatedRecords').remove();
-                            thisInstance.loadRelatedListByPaging(src_record, blockId, headerContainer, page);
+                            element.closest('.blockData').remove();
+
+                            //#1165708
+                            // dont reload list after delete
+                            //thisInstance.loadRelatedListByPaging(src_record, blockId, headerContainer, page);
                         },
                         function(textStatus, errorThrown){
 
@@ -1419,6 +1896,7 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         });
     },
     collapseExpandBlock : function(){
+        $('.related-blocks-lists-blockToggle').off('click');
         $('body').delegate('.related-blocks-lists-blockToggle','click',function(e){
             var element = jQuery(e.currentTarget);
             var mode = element.data('mode');
@@ -1434,6 +1912,49 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             }
         });
     },
+    registerEventShowChildRelatedRecords : function(container,id){
+        var thisInstance = this;
+        var spanCollapsed = container.find('.vtetoggle');
+        spanCollapsed.unbind().click(function(e) {
+            var element = jQuery(e.currentTarget);
+            //Gets all <tr>'s  of greater depth
+            //below element in the table
+            var findChildren = function (tr) {
+                var depth = tr.data('depth');
+                return tr.nextUntil($('tr').filter(function () {
+                    return $(this).data('depth') <= depth;
+                }));
+            };
+
+            var el = $(this);
+            var tr = element.closest('tr'); //Get <tr> parent of toggle button
+            var children = findChildren(tr);
+
+            //Remove already collapsed nodes from children so that we don't
+            //make them visible.
+            //(Confused? Remove this code and close Item 2, close Item 1
+            //then open Item 1 again, then you will understand)
+            var subnodes = children.filter('.expand');
+            subnodes.each(function () {
+                var subnode = $(this);
+                var subnodeChildren = findChildren(subnode);
+                children = children.not(subnodeChildren);
+            });
+            //Change icon and hide/show children
+            if (tr.hasClass('vteCollapse')) {
+                tr.removeClass('vteCollapse').addClass('expand');
+                children.toggleClass('slideToggle');
+                children.find('td').css({'padding':'0px','border-top':'none'})
+                //children.fadeOut();
+            } else {
+                tr.removeClass('expand').addClass('vteCollapse');
+                children.toggleClass('slideToggle');
+                children.find('td').css({'padding':'3px','border-top':'1px solid #ddd'})
+                //children.fadeIn(600);
+            }
+            return children;
+        });
+    },
     registerEvents: function() {
         // Only load when loadHeaderScript=1 BEGIN #241208
         if (typeof VTECheckLoadHeaderScript == 'function') {
@@ -1446,6 +1967,10 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         var container = jQuery(document).find('form');
         this.checkAndGenerateBlocks(container);
         this.collapseExpandBlock();
+        var self = this;
+        jQuery(document).ajaxComplete(function(){
+            self.collapseExpandBlock();
+        });
     },
 
     getQueryParams:function(qs) {
@@ -1470,12 +1995,12 @@ jQuery(document).ready(function(){
     app.event.on("post.relatedListLoad.click",function(event, container){
         RelatedBlocksLists_Js.___init();
     });
-    
+
     // Load jquery if not exist
     if ($("<input/>").validationEngine == undefined){
-        loadScript('libraries/jquery/posabsolute-jQuery-Validation-Engine/js/jquery.validationEngine.js');   
+        loadScript('libraries/jquery/posabsolute-jQuery-Validation-Engine/js/jquery.validationEngine.js');
     }
-    
+
     $("body").mousemove(function(e){
         var p1 = $(e.target);
         if (!p1.hasClass('fieldBlockContainer')){
@@ -1488,7 +2013,7 @@ jQuery(document).ready(function(){
             }
         }
     });
-    
+
     $(document).keydown(function (e) {
         if( e.which === 65 && e.altKey ) {
             if (RBL_relatedblockslists_records){
@@ -1498,8 +2023,8 @@ jQuery(document).ready(function(){
             }
         }
     });
+    window.onbeforeunload = null;
 });
-
 /**
  * @Link http://stackoverflow.com/questions/950087/how-to-include-a-javascript-file-in-another-javascript-file#answer-950146
  */
@@ -1530,3 +2055,271 @@ function waitUntil(waitFor,toDo){
         }, 300);
     }
 }
+
+jQuery(document).ajaxComplete( function (event, request, settings) {
+    var url = settings.data;
+
+    if(typeof url == 'undefined' && settings.url) url = settings.url;
+    if(url == undefined) return;
+    if (Object.prototype.toString.call(url) =='[object String]') {
+        var targetModule = '';
+        var targetView = '';
+        var sourceModule = '';
+        var mode = '';
+        var viewMode = '';
+        var record = '';
+        var relatedModule = '';
+        var sURLVariables = url.split('&');
+        for (var i = 0; i < sURLVariables.length; i++) {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == 'module') {
+                targetModule = sParameterName[1];
+            } else if (sParameterName[0] == 'view') {
+                targetView = sParameterName[1];
+            } else if (sParameterName[0] == 'sourceModule') {
+                sourceModule = sParameterName[1];
+            } else if (sParameterName[0] == 'mode') {
+                mode = sParameterName[1];
+            } else if (sParameterName[0] == 'requestMode') {
+                viewMode = sParameterName[1];
+            } else if (sParameterName[0] == 'record') {
+                record = sParameterName[1];
+            } else if (sParameterName[0] == 'relatedModule') {
+                relatedModule = sParameterName[1];
+
+            }
+        }
+        if (mode == 'showRelatedList') {
+            var params = {};
+            var mode = 'replaceRelatedBlockLists';
+            var module = app.getModuleName();
+            params['module'] = 'RelatedBlocksLists';
+            params['action'] = 'ActionAjax';
+            params['mode'] = 'getBlockRelatedLists';
+            params['source_module'] = module;
+            params['parent_record'] = record;
+            params['relatedModule'] = relatedModule;
+
+            app.request.post({data:params}).then(
+                function(err,data) {
+                    if(err == null) {
+                        var blocks=data;
+                        blocks = jQuery.parseJSON(blocks);
+                        blocks = blocks.reverse();
+                        var arrBlockId = [];
+                         global_flag = false;
+                        if(blocks.length) {
+                            $('.relatedContainer').css('display','none');
+                             app.helper.showProgress();
+                            $('.relatedContainer').html('');
+                            blocks.forEach(function (item){
+                                var after_block = item.blockData[0];
+                                var after_block_label = item.blockData[1];
+                                var blockid = item.blockId;
+                                if(arrBlockId[after_block]){
+                                    arrBlockId[after_block].push(blockid);
+                                }else{
+                                    arrBlockId[after_block] = [blockid];
+                                }
+                                if(item.blockData[3].length > 2){
+                                    jQuery('[name="picklistDependency"]','form').attr('value',item.blockData[3]);
+                                }
+                                var html = '<div id="related_block_content_'+item.blockData[0]+'"></div>';
+                                $('.relatedContainer').append(html);
+                            });
+			     var related_list = '';
+                            var totalItems = blocks.length;
+                            idxItem = 0;
+                           
+                            blocks.forEach(function (item){
+                                idxItem += 1;
+                                var after_block = item.blockData[0];
+                                var after_block_label = item.blockData[1];
+                                var blockid = item.blockId;
+                                var viewParams = {
+                                    module:'RelatedBlocksLists',
+                                    view:'MassActionAjax',
+                                    mode: mode,
+                                    record:record,
+                                    blockid:blockid,
+                                    source_module:module,
+                                    relatedModule:relatedModule,
+                                };
+                                 //app.helper.showProgress();
+                                app.request.post({data:viewParams}).then(
+                                    function (err,data) {
+                                        if (err == null) {
+                                            app.helper.hideProgress();
+                                            $('#related_block_content_'+item.blockData[0]).html(data);
+                                            var rbl_item = jQuery('div.relatedblockslists' + blockid);
+                                            var RelatedClass = new RelatedBlocksLists_Js()
+                                            RelatedClass.registerDetailViewEvents(rbl_item);
+                                            RelatedClass.registerEventForSelectExistingRecordButton(rbl_item);
+                                            var chk_detail_inline_edit = rbl_item.find('.chk_detail_inline_edit').val();
+                                            if(chk_detail_inline_edit == 0){
+                                                rbl_item.find('span.edit').remove();
+                                            }
+                                            if (idxItem == totalItems){
+                                                global_flag = true;
+                                            }
+                                        }
+                                    }
+                                );
+                            })
+                        }
+                        
+                        var showBlockInterval = setInterval(function(){
+                            if (global_flag){
+                              $('.relatedContainer').css('display','block');
+                              clearInterval(showBlockInterval);
+                            }
+                      }, 2000);
+                    }
+                }
+            );
+
+        }
+
+    }
+});
+
+jQuery(document).ready(function(){
+    var url = window.location.href;
+    if (Object.prototype.toString.call(url) =='[object String]') {
+        var targetModule = '';
+        var targetView = '';
+        var sourceModule = '';
+        var mode = '';
+        var viewMode = '';
+        var record = '';
+        var relatedModule = '';
+        var sURLVariables = url.split('&');
+        for (var i = 0; i < sURLVariables.length; i++) {
+            var sParameterName = sURLVariables[i].split('=');
+            if (sParameterName[0] == 'module') {
+                targetModule = sParameterName[1];
+            } else if (sParameterName[0] == 'view') {
+                targetView = sParameterName[1];
+            } else if (sParameterName[0] == 'sourceModule') {
+                sourceModule = sParameterName[1];
+            } else if (sParameterName[0] == 'mode') {
+                mode = sParameterName[1];
+            } else if (sParameterName[0] == 'requestMode') {
+                viewMode = sParameterName[1];
+            } else if (sParameterName[0] == 'record') {
+                record = sParameterName[1];
+            } else if (sParameterName[0] == 'relatedModule') {
+                relatedModule = sParameterName[1];
+
+            }
+        }
+        if (mode == 'showRelatedList') {
+            var params = {};
+            var mode = 'replaceRelatedBlockLists';
+            var module = app.getModuleName();
+            params['module'] = 'RelatedBlocksLists';
+            params['action'] = 'ActionAjax';
+            params['mode'] = 'getBlockRelatedLists';
+            params['source_module'] = module;
+            params['parent_record'] = record;
+            params['relatedModule'] = relatedModule;
+
+            app.request.post({data:params}).then(
+                function(err,data) {
+                    if(err == null) {
+                        var blocks=data;
+                        blocks = jQuery.parseJSON(blocks);
+                        blocks = blocks.reverse();
+                        var arrBlockId = [];
+                         global_flag = false;
+                        if(blocks.length) {
+                            $('.relatedContainer').css('display','none');
+                             app.helper.showProgress();
+                            $('.relatedContainer').html('');
+                            blocks.forEach(function (item){
+                                var after_block = item.blockData[0];
+                                var after_block_label = item.blockData[1];
+                                var blockid = item.blockId;
+                                if(arrBlockId[after_block]){
+                                    arrBlockId[after_block].push(blockid);
+                                }else{
+                                    arrBlockId[after_block] = [blockid];
+                                }
+                                if(item.blockData[3].length > 2){
+                                    jQuery('[name="picklistDependency"]', 'form').attr('value',item.blockData[3]);
+                                }
+                                var html = '<div id="related_block_content_'+item.blockData[0]+'"></div>';
+                                $('.relatedContainer').append(html);
+                            });
+
+                            var totalItems = blocks.length;
+                            idxItem = 0;
+                           
+                            blocks.forEach(function (item){
+                                idxItem += 1;
+                                var after_block = item.blockData[0];
+                                var after_block_label = item.blockData[1];
+                                var blockid = item.blockId;
+                                var viewParams = {
+                                    module:'RelatedBlocksLists',
+                                    view:'MassActionAjax',
+                                    mode: mode,
+                                    record:record,
+                                    blockid:blockid,
+                                    source_module:module,
+                                    relatedModule:relatedModule,
+                                };
+                                //app.helper.showProgress();
+                                app.request.post({data:viewParams}).then(
+                                    function (err,data) {
+                                        if (err == null) {
+                                            app.helper.hideProgress();
+                                            $('#related_block_content_'+item.blockData[0]).html(data);
+                                            var rbl_item = jQuery('div.relatedblockslists' + blockid);
+                                            var RelatedClass = new RelatedBlocksLists_Js()
+                                            RelatedClass.registerDetailViewEvents(rbl_item);
+                                            RelatedClass.registerEventForSelectExistingRecordButton(rbl_item);
+
+                                            var chk_detail_inline_edit = rbl_item.find('.chk_detail_inline_edit').val();
+                                            if(chk_detail_inline_edit == 0){
+                                                rbl_item.find('span.edit').remove();
+                                            }
+                                            if (idxItem == totalItems){
+                                                global_flag = true;
+                                            }
+                                        }
+                                    }
+                                );
+
+                            })
+                        }
+                        
+                        var showBlockInterval = setInterval(function(){
+                            if (global_flag){
+                              $('.relatedContainer').css('display','block');
+                              clearInterval(showBlockInterval);
+                            }
+                      }, 2000);
+                    }
+                }
+            );
+
+        }
+    }
+});
+// add sequence for if "Replace related list" is selected).
+$('body').on('change','select[name="after_block"]',function(){
+    var module = $(this).find('option:selected').text();
+    var parent = $(this).parent().parent().parent();
+    if(module.indexOf('Replace') !=-1){
+        var html = '<div class="col-sm-12 col-xs-12 input-group"><div class="form-group">';
+        html += '<label class="col-sm-4 control-label fieldLabel"><strong>Sequence</strong></label>';
+        html += '<div class="fieldValue col-lg-3 col-md-3 col-sm-3 input-group">';
+        html += '<input type="text" class="inputElement" name="sequence" value="">';
+        html + '</div></div></div>';
+
+        $('.sequence-group').html(html);
+    }else{
+        $('.sequence-group').html('');
+    }
+});

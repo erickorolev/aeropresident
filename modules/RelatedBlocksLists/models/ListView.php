@@ -61,7 +61,7 @@ class RelatedBlocksLists_ListView_Model extends Vtiger_ListView_Model
             $relatedQuery = $relationListView->getRelationQuery();
             $position = stripos($relatedQuery, " from ");
             if ($position) {
-                $split = spliti(" from ", $relatedQuery);
+                $split = preg_split("/\\sfrom\\s/i", $relatedQuery);
                 $splitCount = count($split);
                 $conditonQuery = "SELECT vtiger_crmentity.crmid AS crmid";
                 for ($i = 1; $i < $splitCount; $i++) {

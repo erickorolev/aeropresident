@@ -1310,6 +1310,9 @@ jQuery.Class("RelatedBlocksLists_Js",{
             var record=element.data('record-id');
             if(record) {
                 var relModule = element.data('rel-module');
+                if(relModule=="Events"){
+                    relModule='Calendar';
+                }
                 var params = {};
                 params.action = 'RelationAjax';
                 params.mode = 'deleteRelation';

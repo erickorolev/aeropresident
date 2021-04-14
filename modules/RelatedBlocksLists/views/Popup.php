@@ -2,11 +2,12 @@
 
 class RelatedBlocksLists_Popup_View extends Vtiger_Footer_View
 {
+    protected $listViewEntries = false;
     protected $listViewHeaders = false;
     public function __construct()
     {
         parent::__construct();
-    }
+    }    
     public function checkPermission(Vtiger_Request $request)
     {
     }
@@ -26,11 +27,16 @@ class RelatedBlocksLists_Popup_View extends Vtiger_Footer_View
         $moduleName = $request->getModule();
         $viewer->view("PopupFooter.tpl", $moduleName);
     }
+    /**
+     * Function to get the list of Script models to be included
+     * @param Vtiger_Request $request
+     * @return <Array> - List of Vtiger_JsScript_Model instances
+     */
     public function getHeaderScripts(Vtiger_Request $request)
     {
-        $headerScriptInstances = $this::getHeaderScripts($request);
+        $headerScriptInstances = parent::getHeaderScripts($request);
         $moduleName = $request->getModule();
-        $jsFileNames = ["modules.Vtiger.resources.Popup", "modules." . $moduleName . ".resources.Popup", "modules.Vtiger.resources.BaseList", "modules." . $moduleName . ".resources.BaseList", "libraries.jquery.jquery_windowmsg", "modules.Vtiger.resources.validator.BaseValidator", "modules.Vtiger.resources.validator.FieldValidator", "modules." . $moduleName . ".resources.validator.FieldValidator"];
+        $jsFileNames = array("modules.Vtiger.resources.Popup", "modules." . $moduleName . ".resources.Popup", "modules.Vtiger.resources.BaseList", "modules." . $moduleName . ".resources.BaseList", "libraries.jquery.jquery_windowmsg", "modules.Vtiger.resources.validator.BaseValidator", "modules.Vtiger.resources.validator.FieldValidator", "modules." . $moduleName . ".resources.validator.FieldValidator");
         $jsScriptInstances = $this->checkAndConvertJsScripts($jsFileNames);
         $headerScriptInstances = array_merge($headerScriptInstances, $jsScriptInstances);
         return $headerScriptInstances;
@@ -158,7 +164,7 @@ class RelatedBlocksLists_Popup_View extends Vtiger_Footer_View
             $this->listViewEntries = $listViewModel->getListViewEntries($pagingModel);
         }
         if (empty($searchParams)) {
-            $searchParams = [];
+            $searchParams = array();
         }
         foreach ($searchParams as $fieldListGroup) {
             foreach ($fieldListGroup as $fieldSearchInfo) {
@@ -211,7 +217,7 @@ class RelatedBlocksLists_Popup_View extends Vtiger_Footer_View
             }
             $totalCount = $this->listViewCount;
             $pageLimit = $pagingModel->getPageLimit();
-            $pageCount = ceil((array) $totalCount / (array) $pageLimit);
+            $pageCount = ceil((int) $totalCount / (int) $pageLimit);
             if ($pageCount == 0) {
                 $pageCount = 1;
             }
@@ -221,6 +227,10 @@ class RelatedBlocksLists_Popup_View extends Vtiger_Footer_View
         $viewer->assign("MULTI_SELECT", $multiSelectMode);
         $viewer->assign("CURRENT_USER_MODEL", Users_Record_Model::getCurrentUserModel());
     }
+    /**
+     * Function to get listView count
+     * @param Vtiger_Request $request
+     */
     public function getListViewCount(Vtiger_Request $request)
     {
         $moduleName = $request->getModule();
@@ -264,16 +274,20 @@ class RelatedBlocksLists_Popup_View extends Vtiger_Footer_View
         }
         return $count;
     }
+    /**
+     * Function to get the page count for list
+     * @return total number of pages
+     */
     public function getPageCount(Vtiger_Request $request)
     {
         $listViewCount = $this->getListViewCount($request);
         $pagingModel = new Vtiger_Paging_Model();
         $pageLimit = $pagingModel->getPageLimit();
-        $pageCount = ceil((array) $listViewCount / (array) $pageLimit);
+        $pageCount = ceil((int) $listViewCount / (int) $pageLimit);
         if ($pageCount == 0) {
             $pageCount = 1;
         }
-        $result = [];
+        $result = array();
         $result["page"] = $pageCount;
         $result["numberOfRecords"] = $listViewCount;
         $response = new Vtiger_Response();

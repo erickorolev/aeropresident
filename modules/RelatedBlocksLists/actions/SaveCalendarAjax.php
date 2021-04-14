@@ -5,7 +5,7 @@ class RelatedBlocksLists_SaveCalendarAjax_Action extends Vtiger_SaveAjax_Action
     public function __construct()
     {
         parent::__construct();
-    }
+    }    
     public function process(Vtiger_Request $request)
     {
         $request->set("module", $request->get("rel_module"));

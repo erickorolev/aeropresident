@@ -12,7 +12,7 @@ class RelatedBlocksLists_VTELicense_Model
     public $license = "";
     public function __construct($module = "")
     {
-        $_REQUEST;
+        global $_REQUEST;
         global $currentModule;
         global $root_directory;
         global $site_URL;
@@ -52,13 +52,13 @@ class RelatedBlocksLists_VTELicense_Model
         if (strtolower($module) != strtolower($this->module) || $this->urlClean(strtolower($site_url)) != $this->urlClean(strtolower($this->site_url))) {
             return false;
         }
-        return ["module" => $module, "site_url" => $site_url, "license" => $license, "expiration_date" => $expiration_date, "date_created" => $date_created];
+        return array("module" => $module, "site_url" => $site_url, "license" => $license, "expiration_date" => $expiration_date, "date_created" => $date_created);
     }
     public function readLicenseFile()
     {
-    	return true;
         global $root_directory;
         global $site_URL;
+        return true;
         if (substr($site_URL, -1) != "/") {
             $site_URL .= "/";
         }
@@ -79,7 +79,7 @@ class RelatedBlocksLists_VTELicense_Model
         }
         try {
             $data = "<data>\r\n                <license>" . $license . "</license>\r\n                <site_url>" . $site_url . "</site_url>\r\n                <module>" . $module . "</module>\r\n                <uri>" . $_SERVER["REQUEST_URI"] . "</uri>\r\n                </data>";
-            $client = new SoapClient("http://license.vtexperts.com/license/soap.php?wsdl", ["trace" => 1, "exceptions" => 0, "cache_wsdl" => WSDL_CACHE_NONE]);
+            $client = new SoapClient("http://license.vtexperts.com/license/soap.php?wsdl", array("trace" => 1, "exceptions" => 0, "cache_wsdl" => WSDL_CACHE_NONE));
             $arr = $client->validate($data);
             $this->result = $arr["result"];
             $this->message = $arr["message"];
@@ -89,22 +89,22 @@ class RelatedBlocksLists_VTELicense_Model
         } catch (Exception $exception) {
             $this->result = "bad";
             $this->message = "Unable to connect to licensing service. Please either check the server's internet connection, or proceed with offline licensing.<br>";
-            if ($this->message != "") {
-                $errormsg = "License Failed with message: " . $this->message . "<br>";
-            } else {
-                $errormsg = "Invalid License<br>";
-            }
-            $errormsg .= "Please try again or contact <a href='http://www.vtexperts.com/' target='_new'>vTiger Experts</a> for assistance.";
-            $this->message = $errormsg;
-            if ($this->result == "ok" || $this->result == "valid") {
-                return true;
-            }
-            return false;
         }
+        if ($this->message != "") {
+            $errormsg = "License Failed with message: " . $this->message . "<br>";
+        } else {
+            $errormsg = "Invalid License<br>";
+        }
+        $errormsg .= "Please try again or contact <a href='http://www.vtexperts.com/' target='_new'>vTiger Experts</a> for assistance.";
+        $this->message = $errormsg;
+        if ($this->result == "ok" || $this->result == "valid") {
+            return true;
+        }
+        return false;
     }
     public function validate()
     {
-    	return true;
+        return true;
         if (file_exists($this->file)) {
             $this->readLicenseFile();
         } else {
@@ -117,27 +117,27 @@ class RelatedBlocksLists_VTELicense_Model
             return true;
         }
         global $adb;
-        $adb->pquery("DELETE FROM `vte_modules` WHERE module=?;", ["RelatedBlocksLists"]);
-        $adb->pquery("INSERT INTO `vte_modules` (`module`, `valid`) VALUES (?, ?);", ["RelatedBlocksLists", "0"]);
+        $adb->pquery("DELETE FROM `vte_modules` WHERE module=?;", array("RelatedBlocksLists"));
+        $adb->pquery("INSERT INTO `vte_modules` (`module`, `valid`) VALUES (?, ?);", array("RelatedBlocksLists", "0"));
         return false;
     }
     public function RegenerateLicense()
     {
-    	return true;
+        return true;
         global $site_URL;
         $VTEStoreTabid = getTabid("VTEStore");
         if (0 < $VTEStoreTabid && file_exists("modules/VTEStore/models/VTEModule.php")) {
             require_once "modules/VTEStore/models/VTEModule.php";
             if (class_exists("VTEStore_VTEModule_Model")) {
                 $modelInstance = new VTEStore_VTEModule_Model();
-                if (method_exists($modelInstance, "regenerateLicense") && is_callable([$modelInstance, "regenerateLicense"])) {
+                if (method_exists($modelInstance, "regenerateLicense") && is_callable(array($modelInstance, "regenerateLicense"))) {
                     $session_site_url = VTEStore_Util_Helper::reFormatVtigerUrl($site_URL);
                     if (!$_SESSION[$session_site_url]["customerLogined"]) {
                         $db = PearDatabase::getInstance();
                         $sql = "SELECT * FROM vtestore_user";
-                        $res = $db->pquery($sql, []);
+                        $res = $db->pquery($sql, array());
                         if (0 < $db->num_rows($res)) {
-                            $options = [];
+                            $options = array();
                             $options["username"] = $db->query_result($res, 0, "username");
                             $options["password"] = $db->query_result($res, 0, "password");
                             $options["vtiger_url"] = $site_URL;
@@ -145,7 +145,7 @@ class RelatedBlocksLists_VTELicense_Model
                         }
                     }
                     $extensionName = $this->module;
-                    $moduleInfo = ["moduleName" => $extensionName];
+                    $moduleInfo = array("moduleName" => $extensionName);
                     $serverResponse = $modelInstance->regenerateLicense($moduleInfo);
                     $error = $serverResponse["error"];
                     if ($error == "0") {
@@ -162,8 +162,8 @@ class RelatedBlocksLists_VTELicense_Model
     }
     public function activateLicense($data)
     {
-    	return true;
-        $_POST;
+        return true;
+        global $_POST;
         global $root_directory;
         global $site_URL;
         $site_url = $data["site_url"];
@@ -190,7 +190,7 @@ class RelatedBlocksLists_VTELicense_Model
         global $root_directory;
         $data = "<data>\r\n\t\t<license>" . $this->license . "</license>\r\n\t\t<site_url>" . $this->site_url . "</site_url>\r\n\t\t<module>" . $this->module . "</module>\r\n\t\t<uri>" . $_SERVER["REQUEST_URI"] . "</uri>\r\n\t\t</data>";
         try {
-            $client = new SoapClient("http://license.vtexperts.com/license/soap.php?wsdl", ["trace" => 1, "exceptions" => 0]);
+            $client = new SoapClient("http://license.vtexperts.com/license/soap.php?wsdl", array("trace" => 1, "exceptions" => 0));
             $arr = $client->validate($data);
             $this->result = $arr["result"];
             $this->message = $arr["message"];
@@ -227,16 +227,16 @@ class RelatedBlocksLists_VTELicense_Model
         }
         if (is_writable($filename)) {
             if (!($handle = fopen($filename, "a"))) {
-                echo "Cannot open file (" . $filename . ")";
+                print "Cannot open file (" . $filename . ")";
                 exit;
             }
             if (!fwrite($handle, $content)) {
-                echo "Cannot write to file (" . $filename . ")";
+                print "Cannot write to file (" . $filename . ")";
                 exit;
             }
             fclose($handle);
         } else {
-            echo "The file " . $filename . " is not writable";
+            print "The file " . $filename . " is not writable";
         }
     }
     public function encrypt($str)

@@ -15,6 +15,7 @@ class RelatedBlocksLists_ActionAjax_Action extends Vtiger_Action_Controller
         $this->exposeMethod("getConfiguredBlock");
         $this->exposeMethod("addExistedRecords");
         $this->exposeMethod("updateSequenceNumber");
+        $this->exposeMethod("saveWidthField");
     }
     
     public function process(Vtiger_Request $request)
@@ -82,8 +83,8 @@ class RelatedBlocksLists_ActionAjax_Action extends Vtiger_Action_Controller
         $response = new Vtiger_Response();
         try {
             $source_module = $request->get("source_module");
-            if ($source_module == "Calendar" && $request->get("source_record") != "") {
-                $recordModel = Vtiger_Record_Model::getInstanceById($request->get("source_record"));
+            if ($source_module == "Calendar" && $request->get("parent_record") != "") {
+                $recordModel = Vtiger_Record_Model::getInstanceById($request->get("parent_record"));
                 $source_module = $recordModel->getType();
             }
             $sql = "SELECT rb.*, vb.blocklabel FROM `relatedblockslists_blocks` rb\r\n              INNER JOIN vtiger_blocks vb ON vb.blockid=rb.after_block";
@@ -99,7 +100,12 @@ class RelatedBlocksLists_ActionAjax_Action extends Vtiger_Action_Controller
                 while ($row = $adb->fetch_array($rs)) {
                     $after_block = $row["after_block"];
                     $sequence = $row["sequence"];
-                    $arrBlocks[$row["blockid"]] = array($after_block, vtranslate($row["blocklabel"], $row["module"]), $sequence);
+                    $picklistDependencyDatasource = Vtiger_DependencyPicklist::getPicklistDependencyDatasource($row["relmodule"]);
+                    if (version_compare($vtiger_current_version, "7.0.0", "<")) {
+                        $arrBlocks[$row["blockid"]] = array($after_block, vtranslate($row["blocklabel"], $row["module"]), $sequence, json_encode($picklistDependencyDatasource));
+                    } else {
+                        $arrBlocks[$row["blockid"]] = array($after_block, vtranslate($row["blocklabel"], $row["module"]), $sequence, Vtiger_Functions::jsonEncode($picklistDependencyDatasource));
+                    }
                 }
             }
             if (!version_compare($vtiger_current_version, "7.0.0", "<")) {
@@ -139,6 +145,7 @@ class RelatedBlocksLists_ActionAjax_Action extends Vtiger_Action_Controller
             $rs = $adb->pquery($sql, array($blockid));
             $source_module = $adb->query_result($rs, 0, "module");
             $related_module = $adb->query_result($rs, 0, "relmodule");
+            $related_module_base = $related_module;
             $parentModuleModel = Vtiger_Module_Model::getInstance($source_module);
             $relModuleModel = Vtiger_Module_Model::getInstance($related_module);
             $fieldModelList = $relModuleModel->getFields();
@@ -180,70 +187,48 @@ class RelatedBlocksLists_ActionAjax_Action extends Vtiger_Action_Controller
             }
             if ($related_module == "Calendar") {
                 $moduleModel = new RelatedBlocksLists_Module_Model();
-                $relRecordModel = $moduleModel->setDataForCalendarRecord($relRecordModel, $_REQUEST);
+                $relRecordModel = $moduleModel->setDataForCalendarRecord($relRecordModel, $_REQUEST, $related_module_base);
             }
-            $relRecordModel->save();
-            $relRecordId = $relRecordModel->getId();
+            $isParentRecordRel = true;
             if ($source_module == "Accounts" && in_array($related_module, array("Contacts", "Quotes", "SalesOrder", "Invoice"))) {
-                $relFocus = $relRecordModel->getEntity();
-                $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`accountid`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
+                $relRecordModel->set("account_id", $parentRecordId);
             } else {
                 if ($source_module == "Contacts" && in_array($related_module, array("PurchaseOrder", "Quotes", "SalesOrder", "Invoice"))) {
-                    $relFocus = $relRecordModel->getEntity();
-                    $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`contactid`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
+                    $relRecordModel->set("contact_id", $parentRecordId);
                 } else {
                     if ($source_module == "Campaigns" && $related_module == "Potentials") {
-                        $relFocus = $relRecordModel->getEntity();
-                        $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`campaignid`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
+                        $relRecordModel->set("campaignid", $parentRecordId);
                     } else {
                         if ($source_module == "Potentials" && in_array($related_module, array("Quotes", "SalesOrder"))) {
-                            $relFocus = $relRecordModel->getEntity();
-                            $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`potentialid`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
+                            $relRecordModel->set("potential_id", $parentRecordId);
                         } else {
                             if ($source_module == "Products" && in_array($related_module, array("Faq", "HelpDesk", "Campaigns"))) {
-                                $relFocus = $relRecordModel->getEntity();
-                                $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`productid`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
+                                $relRecordModel->set("productid", $parentRecordId);
                             } else {
                                 if ($source_module == "Quotes" && $related_module == "SalesOrder") {
-                                    $relFocus = $relRecordModel->getEntity();
-                                    $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`quoteid`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
+                                    $relRecordModel->set("quote_id", $parentRecordId);
                                 } else {
                                     if ($source_module == "SalesOrder" && $related_module == "Invoice") {
-                                        $relFocus = $relRecordModel->getEntity();
-                                        $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`salesorderid`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
+                                        $relRecordModel->set("salesorder_id", $parentRecordId);
                                     } else {
-                                        if ($source_module == "Vendors" && $related_module == "Products") {
-                                            $relFocus = $relRecordModel->getEntity();
-                                            $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`vendor_id`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
+                                        if ($source_module == "Vendors" && in_array($related_module, array("Products", "PurchaseOrder"))) {
+                                            $relRecordModel->set("vendor_id", $parentRecordId);
                                         } else {
-                                            if ($source_module == "Vendors" && $related_module == "PurchaseOrder") {
-                                                $relFocus = $relRecordModel->getEntity();
-                                                $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`vendorid`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
-                                            } else {
-                                                if ($related_module == "Calendar") {
-                                                    if ($source_module == "Contacts") {
-                                                        $result = $adb->pquery("SELECT activityid FROM vtiger_cntactivityrel WHERE  contactid =? AND  activityid =?", array($parentRecordId, $relRecordId));
-                                                        if ($adb->num_rows($result) == 0) {
-                                                            $adb->pquery("INSERT INTO vtiger_cntactivityrel(`contactid`,`activityid`) VALUES(?,?)", array($parentRecordId, $relRecordId));
-                                                        }
-                                                    } else {
-                                                        $result = $adb->pquery("SELECT activityid FROM vtiger_seactivityrel WHERE  crmid =? AND  activityid =?", array($parentRecordId, $relRecordId));
-                                                        if ($adb->num_rows($result) == 0) {
-                                                            $adb->pquery("INSERT INTO vtiger_seactivityrel(`crmid`,`activityid`) VALUES(?,?)", array($parentRecordId, $relRecordId));
-                                                        }
-                                                    }
+                                            if ($related_module == "Calendar" || $related_module == "Events") {
+                                                if ($source_module == "Contacts") {
+                                                    $_REQUEST["contactidlist"] = $parentRecordId;
                                                 } else {
-                                                    $dependentFieldSql = $adb->pquery("SELECT tabid, fieldname, columnname FROM vtiger_field WHERE uitype='10' AND" . " fieldid IN (SELECT fieldid FROM vtiger_fieldmodulerel WHERE relmodule=? AND module=?)", array($source_module, $related_module));
-                                                    $numOfFields = $adb->num_rows($dependentFieldSql);
-                                                    if (0 < $numOfFields) {
-                                                        $dependentColumn = $adb->query_result($dependentFieldSql, 0, "columnname");
-                                                        $dependentField = $adb->query_result($dependentFieldSql, 0, "fieldname");
-                                                        $relFocus = $relRecordModel->getEntity();
-                                                        $adb->pquery("update `" . $relFocus->table_name . "` set `" . $relFocus->table_name . "`.`" . $dependentColumn . "`=? where `" . $relFocus->table_index . "`=?", array($parentRecordId, $relRecordId));
-                                                    } else {
-                                                        $relationModel = Vtiger_Relation_Model::getInstance($parentModuleModel, $relModuleModel);
-                                                        $relationModel->addRelation($parentRecordId, $relRecordId);
-                                                    }
+                                                    $relRecordModel->set("parent_id", $parentRecordId);
+                                                }
+                                            } else {
+                                                $dependentFieldSql = $adb->pquery("SELECT tabid, fieldname, columnname FROM vtiger_field WHERE uitype='10' AND" . " fieldid IN (SELECT fieldid FROM vtiger_fieldmodulerel WHERE relmodule=? AND module=?)", array($source_module, $related_module));
+                                                $numOfFields = $adb->num_rows($dependentFieldSql);
+                                                if (0 < $numOfFields) {
+                                                    $dependentColumn = $adb->query_result($dependentFieldSql, 0, "columnname");
+                                                    $dependentField = $adb->query_result($dependentFieldSql, 0, "fieldname");
+                                                    $relRecordModel->set($dependentField, $parentRecordId);
+                                                } else {
+                                                    $isParentRecordRel = false;
                                                 }
                                             }
                                         }
@@ -254,6 +239,23 @@ class RelatedBlocksLists_ActionAjax_Action extends Vtiger_Action_Controller
                     }
                 }
             }
+            if ($related_module == "Documents") {
+                $isParentRecordRel = false;
+                $relRecordModel->set("filestatus", 1);
+                $relRecordModel->set("notes_title", $_FILES["filename"]["name"]);
+            }
+            $relRecordModel->save();
+            $relRecordId = $relRecordModel->getId();
+            if (!$isParentRecordRel) {
+                $relationModel = Vtiger_Relation_Model::getInstance($parentModuleModel, $relModuleModel);
+                if ($relationModel) {
+                    $relationModel->addRelation($parentRecordId, $relRecordId);
+                }
+            }
+            $parentRecordModel = Vtiger_Record_Model::getInstanceById($parentRecordId);
+            $parentRecordModel->set("mode", "edit");
+            $_REQUEST["ajxaction"] = "DETAILVIEW";
+            $parentRecordModel->save();
             $response->setResult(array("related_record" => $relRecordId));
         } catch (Exception $e) {
             $response->setError($e->getCode(), $e->getMessage());
@@ -354,6 +356,20 @@ class RelatedBlocksLists_ActionAjax_Action extends Vtiger_Action_Controller
         } catch (Exception $e) {
             $response->setError($e->getCode(), $e->getMessage());
         }
+        $response->emit();
+    }
+    public function saveWidthField(Vtiger_Request $request)
+    {
+        global $adb;
+        $fieldname = $request->get("field_name");
+        $field_width = $request->get("field_width");
+        $block_id = $request->get("block_id");
+        if ($field_width) {
+            $adb->pquery("UPDATE `relatedblockslists_fields` SET `width` = ? WHERE `fieldname` = ?  AND `blockid` = ? ", array($field_width, $fieldname, $block_id));
+        }
+        $response = new Vtiger_Response();
+        $response->setEmitType(Vtiger_Response::$EMIT_JSON);
+        $response->setResult(array("save" => true));
         $response->emit();
     }
 }

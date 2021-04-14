@@ -11,7 +11,7 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
         $this->exposeMethod("collapseExpandBlocks");
         $this->exposeMethod("showEditFields");
         $this->exposeMethod("saveEditFields");
-    }
+    }    
     public function process(Vtiger_Request $request)
     {
         $mode = $request->get("mode");
@@ -28,7 +28,7 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
         $viewer = $this->getViewer($request);
         $viewer->assign("FIELDS", $fields);
         $viewer->assign("SELECTED_MODULE_NAME", $select_module);
-        $viewer->assign("BLOCK_DATA", ["fields" => []]);
+        $viewer->assign("BLOCK_DATA", array("fields" => array()));
         echo $viewer->view("Fields.tpl", $moduleName, true);
     }
     public function showEditFields(Vtiger_Request $request)
@@ -40,7 +40,7 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
         $field_name = $request->get("field_name");
         $field_label = $request->get("field_label");
         $sql = "SELECT rbl_b.relmodule, rbl_f.fieldname,rbl_f.mandatory, rbl_f.defaultvalue, f.fieldid FROM `relatedblockslists_fields` rbl_f\n        INNER JOIN relatedblockslists_blocks rbl_b ON rbl_b.blockid = rbl_f.blockid\n        INNER JOIN vtiger_tab t ON t.`name` = rbl_b.relmodule\n        INNER JOIN vtiger_field f ON f.tabid = t.tabid and f.fieldname = rbl_f.fieldname\n        WHERE rbl_f.blockid=" . $blockid . " AND rbl_f.fieldname='" . $field_name . "';";
-        $results = $adb->pquery($sql, []);
+        $results = $adb->pquery($sql, array());
         if (0 < $adb->num_rows($results)) {
             $fieldId = $adb->query_result($results, 0, "fieldid");
             $mandatory = $adb->query_result($results, 0, "mandatory");
@@ -71,22 +71,22 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
             $mandatory = 0;
         }
         $sql = "UPDATE `relatedblockslists_fields` SET defaultvalue ='" . $fieldDefaultValue . "', mandatory='" . $mandatory . "' WHERE blockid='" . $blockid . "' AND fieldname='" . $field_name . "'";
-        $adb->pquery($sql, []);
+        $adb->pquery($sql, array());
         echo "done";
     }
     public function getBlocks(Vtiger_Request $request)
     {
         global $adb;
-        $blocksList = [];
+        $blocksList = array();
         $qualifiedModule = $request->getModule(false);
         $sourceModule = $request->get("sourceModule");
         $blockid = $request->get("blockid");
         if ($blockid) {
             $sql = "SELECT * FROM `relatedblockslists_blocks` WHERE blockid=?";
-            $rs = $adb->pquery($sql, [$blockid]);
+            $rs = $adb->pquery($sql, array($blockid));
         } else {
             $sql = "SELECT * FROM `relatedblockslists_blocks` WHERE module=?";
-            $rs = $adb->pquery($sql, [$sourceModule]);
+            $rs = $adb->pquery($sql, array($sourceModule));
         }
         if (0 < $adb->num_rows($rs)) {
             while ($row = $adb->fetch_array($rs)) {
@@ -100,9 +100,9 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
                 $blocksList[$blockid]["filtervalue"] = $row["filtervalue"];
                 $blocksList[$blockid]["expand"] = $row["expand"];
                 $blocksList[$blockid]["sequence"] = $row["sequence"];
-                $fields = [];
+                $fields = array();
                 $sqlField = "SELECT * FROM `relatedblockslists_fields` WHERE blockid = ? ORDER BY sequence";
-                $rsFields = $adb->pquery($sqlField, [$blockid]);
+                $rsFields = $adb->pquery($sqlField, array($blockid));
                 if (0 < $adb->num_rows($rsFields)) {
                     while ($rowField = $adb->fetch_array($rsFields)) {
                         $fields[] = $relmodule_model->getField($rowField["fieldname"]);
@@ -123,7 +123,7 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
         $blockid = $request->get("blockid");
         $display_status = $request->get("display_status");
         $sql = "UPDATE `relatedblockslists_blocks` SET expand = " . $display_status . " WHERE blockid = " . $blockid;
-        $adb->pquery($sql, []);
+        $adb->pquery($sql, array());
         echo "success";
     }
     public function showSettingsForm(Vtiger_Request $request)
@@ -137,7 +137,7 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
         $viewer = $this->getViewer($request);
         $moduleModel = Settings_LayoutEditor_Module_Model::getInstanceByName($sourceModule);
         $relatedModuleModels = $moduleModel->getRelations();
-        $relatedModulesName = [];
+        $relatedModulesName = array();
         foreach ($relatedModuleModels as $k => $relModuleModel) {
             if ($relModuleModel->getRelationModuleName() == "Calendar") {
                 $relatedModulesName[] = "Calendar";
@@ -146,10 +146,10 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
                 $relatedModulesName[] = $relModuleModel->getRelationModuleName();
             }
         }
-        $data = [];
+        $data = array();
         if ($blockid) {
             $sql = "SELECT * FROM `relatedblockslists_blocks` WHERE blockid=?";
-            $rs = $adb->pquery($sql, [$blockid]);
+            $rs = $adb->pquery($sql, array($blockid));
             if (0 < $adb->num_rows($rs)) {
                 $selectedModule = $adb->query_result($rs, 0, "relmodule");
                 $blockid = $adb->query_result($rs, 0, "blockid");
@@ -161,9 +161,11 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
                 $filtervalue = $adb->query_result($rs, 0, "filtervalue");
                 $sortfield = $adb->query_result($rs, 0, "sortfield");
                 $sorttype = $adb->query_result($rs, 0, "sorttype");
-                $fields = [];
+                $customizable_options = $adb->query_result($rs, 0, "customizable_options");
+                $advanced_query = $adb->query_result($rs, 0, "advanced_query");
+                $fields = array();
                 $sqlField = "SELECT * FROM `relatedblockslists_fields` WHERE blockid = ? ORDER BY sequence";
-                $rsFields = $adb->pquery($sqlField, [$blockid]);
+                $rsFields = $adb->pquery($sqlField, array($blockid));
                 if (0 < $adb->num_rows($rsFields)) {
                     while ($rowField = $adb->fetch_array($rsFields)) {
                         $fields[] = $rowField["fieldname"];
@@ -179,6 +181,8 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
                 $data["filtervalue"] = $filtervalue;
                 $data["sortfield"] = $sortfield;
                 $data["sorttype"] = $sorttype;
+                $data["advanced_query"] = $advanced_query;
+                $data["customizable_options"] = json_decode(html_entity_decode($customizable_options));
                 $moduleHasSet = $this->getModulesHasSet($sourceModule, $selectedModule);
                 foreach ($relatedModulesName as $k => $moduleName) {
                     if (in_array($moduleName, $moduleHasSet)) {
@@ -187,7 +191,7 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
                 }
             }
         } else {
-            $data["fields"] = [];
+            $data["fields"] = array();
             $moduleHasSet = $this->getModulesHasSet($sourceModule);
             foreach ($relatedModulesName as $k => $moduleName) {
                 if (in_array($moduleName, $moduleHasSet) && version_compare($vtiger_current_version, "7.0.0", "<")) {
@@ -199,24 +203,24 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
         $selectedModuleModel = Vtiger_Module_Model::getInstance($selectedModule);
         $fields = $selectedModuleModel->getFields();
         $all_block_models = $moduleModel->getBlocks();
-        $all_block = [];
+        $all_block = array();
         foreach ($all_block_models as $blockModel) {
             $all_block[$blockModel->get("id")] = $blockModel->get("label");
         }
         $recordModel = Settings_PickListDependency_Record_Model::getInstance($selectedModule, "", "");
         $allPickLists = $recordModel->getAllPickListFields();
-        $all_pick_lists_values = [];
+        $all_pick_lists_values = array();
         if (0 < count($allPickLists)) {
             foreach ($allPickLists as $field_name => $field_label) {
                 $all_pick_lists_values[$field_name] = array_values(Vtiger_Util_Helper::getPickListValues($field_name));
             }
         }
-        $all_pick_lists_of_all_module = [];
-        $all_fields_of_all_module = [];
+        $all_pick_lists_of_all_module = array();
+        $all_fields_of_all_module = array();
         foreach ($relatedModulesName as $item) {
             $recordModel_1 = Settings_PickListDependency_Record_Model::getInstance($item, "", "");
             $allPickLists_1 = $recordModel_1->getAllPickListFields();
-            $all_pick_lists_values_1 = [];
+            $all_pick_lists_values_1 = array();
             if (0 < count($allPickLists_1)) {
                 foreach ($allPickLists_1 as $field_name_1 => $field_label_1) {
                     $all_pick_lists_values_1[$field_name_1 . "," . $field_label_1] = array_values(Vtiger_Util_Helper::getPickListValues($field_name_1));
@@ -225,7 +229,7 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
             $all_pick_lists_of_all_module[$item] = $all_pick_lists_values_1;
             $moduleModelForSort = Vtiger_Module_Model::getInstance($item);
             $allFieldsModel = $moduleModelForSort->getFields();
-            $arrFields = [];
+            $arrFields = array();
             foreach ($allFieldsModel as $key => $fieldModel) {
                 $fieldName = $fieldModel->get("name");
                 $fieldLabel = $fieldModel->get("label");
@@ -265,11 +269,11 @@ class RelatedBlocksLists_MassSettingsAjax_View extends Vtiger_IndexAjax_View
     public function getModulesHasSet($sourceModule, $selectedModule = false)
     {
         global $adb;
-        $result = [];
-        if ($selectedModule) {
-            $rs = $adb->pquery("SELECT relmodule FROM `relatedblockslists_blocks` WHERE module = ? and relmodule != ?", [$sourceModule, $selectedModule]);
+        $result = array();
+        if ($selectedModule != false) {
+            $rs = $adb->pquery("SELECT relmodule FROM `relatedblockslists_blocks` WHERE module = ? and relmodule != ?", array($sourceModule, $selectedModule));
         } else {
-            $rs = $adb->pquery("SELECT relmodule FROM `relatedblockslists_blocks` WHERE module = ?", [$sourceModule]);
+            $rs = $adb->pquery("SELECT relmodule FROM `relatedblockslists_blocks` WHERE module = ?", array($sourceModule));
         }
         if ($adb->num_rows($rs)) {
             while ($data = $adb->fetchByAssoc($rs)) {

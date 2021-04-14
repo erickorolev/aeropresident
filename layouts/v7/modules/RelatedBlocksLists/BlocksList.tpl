@@ -43,6 +43,16 @@
                                     </span>
                                     <!--<a href="javascript:void(0)" data-source-module="{$RELMODULE_NAME}" data-field-label="{$FIELD_MODEL->get('label')}" data-block-id="{$BLOCKID}" data-field-name="{$FIELD_MODEL->get('name')}" class="related-block-list-editFieldDetails pull-right"><i class="fa fa-pencil" title="Edit"></i></a>-->
                                     {assign var=IS_MANDATORY value=$FIELD_MODEL->isMandatory()}
+                                    <div class="row field-width" style="float: right;margin-right: 10px;">
+                                        <span class="fieldLabel">
+                                            <b>{vtranslate('Witdh', $RELMODULE_NAME)}</b>&nbsp;
+                                        </span>
+                                        <span style="float: right;margin-left:10px;">
+                                            <input name="width" type="text" disabled="disabled" class="inputElement vte_related_block_list_field_width" style="width: 80px;height:21px;" value="{RelatedBlocksLists_Module_Model::getWidthForField($FIELD_MODEL->getName(),$BLOCKID)}" />
+                                            <a title="Edit" style="margin-left: 5px;" href="javascript:void(0)" class="enabled_edit_field_width"><i class="fa fa-pencil"></i></a>
+                                            <a style="margin-left:5px;width: 38px;padding: 0px;height: 18px;font-size: 11px;" class="hide btn btn-success save_related_block_list_field_width" data-fieldname = {$FIELD_MODEL->getName()}>Save</a>
+                                        </span>
+                                    </div>
                                 </div>
                             </li>
                         {/if}
@@ -59,6 +69,17 @@
                                     </span>
                                     <!--<a href="javascript:void(0)" data-source-module="{$RELMODULE_NAME}" data-field-label="{$FIELD_MODEL->get('label')}" data-block-id="{$BLOCKID}" data-field-name="{$FIELD_MODEL->get('name')}" class="related-block-list-editFieldDetails pull-right"><i class="fa fa-pencil" title="Edit"></i></a>-->
                                     {assign var=IS_MANDATORY value=$FIELD_MODEL->isMandatory()}
+                                    <div class="row field-width" style="float: right;margin-right: 10px;">
+                                        <span class="fieldLabel">
+                                            <b>{vtranslate('Witdh', $RELMODULE_NAME)}</b>&nbsp;
+                                        </span>
+                                        <span style="float: right;margin-left:10px;">
+                                            <input name="width" disabled="disabled" type="text" class="inputElement vte_related_block_list_field_width" data-fieldname = {$FIELD_MODEL->getName()} value="{RelatedBlocksLists_Module_Model::getWidthForField($FIELD_MODEL->getName(),$BLOCKID)}" style="width: 80px;height:21px;">
+                                            <a title="Edit"  style="margin-left: 5px;" href="javascript:void(0)" class="enabled_edit_field_width"><i class="fa fa-pencil"></i></a>
+                                            <a style="margin-left:5px;width: 38px;padding: 0px;height: 18px;font-size: 11px;" class="hide btn btn-success save_related_block_list_field_width" data-fieldname = {$FIELD_MODEL->getName()} value="{RelatedBlocksLists_Module_Model::getWidthForField($FIELD_MODEL->getName(),$BLOCKID)}">Save</a>
+                                        </span>
+
+                                    </div>
                                 </div>
                             </li>
                         {/if}

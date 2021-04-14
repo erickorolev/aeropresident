@@ -5,8 +5,9 @@
 * Portions created by VTExperts.com. are Copyright(C) VTExperts.com.
 * All Rights Reserved.
 * ****************************************************************************** */*}
-{assign var=IS_MODULE_EDITABLE value=$RELMODULE_MODEL->isPermitted('EditView')}
-{assign var=IS_MODULE_DELETABLE value=$RELMODULE_MODEL->isPermitted('Delete')}
+{assign var=CUSTOMIZABLE_OPTIONS value = RelatedBlocksLists_Module_Model::getCustomizableOptionsForBlock($BLOCKID)}
+{assign var=IS_MODULE_EDITABLE value=$RELMODULE_MODEL->isPermitted('EditView') && $CUSTOMIZABLE_OPTIONS->chk_edit_view_add_btn}
+{assign var=IS_MODULE_DELETABLE value=$RELMODULE_MODEL->isPermitted('Delete') && $CUSTOMIZABLE_OPTIONS->chk_edit_delete_icon}
 {assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
 <table class="table table-borderless">
     <tr>
@@ -45,10 +46,10 @@
                         {/foreach}
                     </select>
                 {else}
-                    {vtranslate($FIELD_MODEL->get('label'), $MODULE)}
+                    {vtranslate($FIELD_MODEL->get('label'), $RELMODULE_NAME)}
                 {/if}
             {else if $FIELD_MODEL->get('uitype') eq "83"}
-                {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$MODULE) COUNTER=$COUNTER MODULE=$MODULE}
+                {include file=vtemplate_path($FIELD_MODEL->getUITypeModel()->getTemplateName(),$RELMODULE_NAME) COUNTER=$COUNTER MODULE=$RELMODULE_NAME}
                 {if $TAXCLASS_DETAILS}
                     {assign 'taxCount' count($TAXCLASS_DETAILS)%2}
                     {if $taxCount eq 0}
@@ -60,34 +61,49 @@
                     {/if}
                 {/if}
             {else}
-                {if $MODULE eq 'Documents' && $FIELD_MODEL->get('label') eq 'File Name'}
+                {if $RELMODULE_NAME eq 'Documents' && $FIELD_MODEL->get('label') eq 'File Name'}
                     {assign var=FILE_LOCATION_TYPE_FIELD value=$RECORD_STRUCTURE['LBL_FILE_INFORMATION']['filelocationtype']}
                     {if $FILE_LOCATION_TYPE_FIELD}
                         {if $FILE_LOCATION_TYPE_FIELD->get('fieldvalue') eq 'E'}
-                            {vtranslate("LBL_FILE_URL", $MODULE)}&nbsp;<span class="redColor">*</span>
+                            {vtranslate("LBL_FILE_URL", $RELMODULE_NAME)}&nbsp;<span class="redColor">*</span>
                         {else}
-                            {vtranslate($FIELD_MODEL->get('label'), $MODULE)}
+                            {vtranslate($FIELD_MODEL->get('label'), $RELMODULE_NAME)}
                         {/if}
                     {else}
-                        {vtranslate($FIELD_MODEL->get('label'), $MODULE)}
+                        {vtranslate($FIELD_MODEL->get('label'), $RELMODULE_NAME)}
                     {/if}
                 {else}
-                    {vtranslate($FIELD_MODEL->get('label'), $MODULE)}
+                    {vtranslate($FIELD_MODEL->get('label'), $RELMODULE_NAME)}
                 {/if}
             {/if}
             &nbsp;{if $FIELD_MODEL->isMandatory() eq true} <span class="redColor">*</span> {/if}
         </td>
         {if $FIELD_MODEL->get('uitype') neq '83'}
-            <td class="fieldValue" {if $FIELD_MODEL->getFieldDataType() eq 'boolean'} style="width:25%" {/if} {if $FIELD_MODEL->get('uitype') eq '19'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if}>
+
+            <td class="fieldValue"  data-field-type="{$FIELD_MODEL->getFieldDataType()}" data-field-width="{RelatedBlocksLists_Module_Model::getWidthForField($FIELD_MODEL->getName(),$BLOCKID,$FIELD_MODEL->getModule()->getName())}" {if $FIELD_MODEL->getFieldDataType() eq 'boolean'} style="width:25%" {/if} {if $FIELD_MODEL->get('uitype') eq '19'} colspan="3" {assign var=COUNTER value=$COUNTER+1} {/if}>
+                {assign var=FIELD_TABID value=RelatedBlocksLists_Module_Model::getRelatedTabIdForField($FIELD_MODEL->getId())}
+                {assign var=CURRENT_TABID value=getTabid($SOURCE_MODULE)}
+                {*{if ($FIELD_MODEL->get('uitype') eq '51' || $FIELD_MODEL->get('uitype') eq '10') && ($CURRENT_TABID eq $FIELD_TABID)}
+                    {if $RECORD_MODEL}
+                        {$RECORD_MODEL ->getDisplayValue($FIELD_MODEL->getName())}
+                    {else}
+                        {$PARENT_NAME['label']}
+                    {/if}
+                {else}*}
                 {assign var = FIELD_NAME value= $FIELD_MODEL->getName()}
-                {if empty($FIELD_MODEL->get('fieldvalue'))}
+                {if $FIELD_MODEL->get('defaultvalue') != '' && $FIELD_MODEL->get('fieldvalue') eq ''}
                     {assign var=FIELD_MODEL_CLONE value=$FIELD_MODEL->set('fieldvalue',$FIELD_MODEL->get('defaultvalue'))}
                 {else}
-                    {assign var=FIELD_MODEL_CLONE value=$FIELD_MODEL}
+                    {if $FIELD_NAME == $BLOCK_FILTER_FIELD}
+                        {assign var=FIELD_MODEL_CLONE value=$FIELD_MODEL->set('fieldvalue',$BLOCK_FILTER_VALUE)}
+                    {else}
+                        {assign var=FIELD_MODEL_CLONE value=$FIELD_MODEL}
+                    {/if}
                 {/if}
-
-                {include file=vtemplate_path($FIELD_MODEL_CLONE->getUITypeModel()->getTemplateName(),$MODULE) BLOCK_FIELDS=$FIELDS_LIST FIELD_NAME =$FIELD_NAME}
+                {include file=vtemplate_path($FIELD_MODEL_CLONE->getUITypeModel()->getTemplateName(),$RELMODULE_NAME) BLOCK_FIELDS=$FIELDS_LIST FIELD_NAME =$FIELD_NAME}
+                {*{/if}*}
             </td>
+
         {/if}
         {/if}
         {/foreach}
@@ -103,7 +119,7 @@
         <a class="relatedBtnDelete pull-right" data-rel-module="{$RELMODULE_NAME}" data-record-id="{$RELATED_RECORD_MODEL->getId()}" style="margin-right:25px; color: #0088cc">{vtranslate('LBL_DELETE')}</a>
     {/if}
     {if $smarty.request.modeView eq 'Detail'}
-        <a class="relatedBtnSave pull-right" data-block-id="{$BLOCKID}" style="margin-right:40px; color: #0088cc">{vtranslate('LBL_SAVE')}</a>
+        <a class="relatedBtnSave pull-right" data-rel-module="{$RELMODULE_NAME}" data-block-id="{$BLOCKID}" style="margin-right:40px; color: #0088cc">{vtranslate('LBL_SAVE')}</a>
     {/if}
     {*<a class="relatedBtnView pull-right" style="margin-right:50px; color: #0088cc">{vtranslate('LBL_VIEW','RelatedBlocksLists')}</a>*}
 </div>

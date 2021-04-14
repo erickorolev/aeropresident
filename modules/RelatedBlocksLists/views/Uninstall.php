@@ -70,14 +70,14 @@ class RelatedBlocksLists_Uninstall_View extends Settings_Vtiger_Index_View
     {
         global $adb;
         $message = "";
-        $adb->pquery("DELETE FROM vtiger_settings_field WHERE `name` = ?", ["Related Blocks & Lists"]);
-        $adb->pquery("DELETE FROM `vtiger_eventhandlers` WHERE handler_class =?", ["RelatedBlocksListsHandler"]);
+        $adb->pquery("DELETE FROM vtiger_settings_field WHERE `name` = ?", array("Related Blocks & Lists"));
+        $adb->pquery("DELETE FROM `vtiger_eventhandlers` WHERE handler_class =?", array("RelatedBlocksListsHandler"));
         $sql = "DROP TABLE `relatedblockslists_settings`;";
-        $result = $adb->pquery($sql, []);
+        $result = $adb->pquery($sql, array());
         $sql = "DROP TABLE `relatedblockslists_blocks`;";
-        $result = $adb->pquery($sql, []);
+        $result = $adb->pquery($sql, array());
         $sql = "DROP TABLE `relatedblockslists_fields`;";
-        $result = $adb->pquery($sql, []);
+        $result = $adb->pquery($sql, array());
         $message .= "&nbsp;&nbsp;- Delete Related Blocks & Lists tables";
         if ($result) {
             $message .= " - DONE";

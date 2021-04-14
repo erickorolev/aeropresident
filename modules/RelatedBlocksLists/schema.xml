@@ -15,6 +15,7 @@
 					`relmodule` varchar(50),
 					`type` varchar(20),
 					`active` int(3),
+					`advanced_query` text,
 					PRIMARY KEY (`blockid`)
 				);]]></sql>
 		</table>
@@ -60,11 +61,19 @@
 			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `sequence` integer AFTER `sorttype`;]]></sql>
 		</table>
 		<table>
+			<name>relatedblockslists_fields</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_fields` ADD COLUMN `width`  varchar(10) NULL AFTER `fieldname`;]]></sql>
+		</table>
+		<table>
 			<name>vte_modules</name>
 			<sql><![CDATA[CREATE TABLE `vte_modules` (
                 `module`  varchar(50) NOT NULL ,
                 `valid`  int(1) NULL ,
                 PRIMARY KEY (`module`));]]></sql>
+		</table>
+		<table>
+			<name>relatedblockslists_blocks</name>
+			<sql><![CDATA[ALTER TABLE `relatedblockslists_blocks` ADD COLUMN `customizable_options` VARCHAR (350) NULL DEFAULT '{"chk_detail_view_icon":1,"chk_edit_view_icon":1,"chk_detail_edit_icon":1,"chk_edit_edit_icon":1,"chk_detail_delete_icon":1,"chk_edit_delete_icon":1,"chk_detail_add_btn":1,"chk_edit_view_add_btn":1,"chk_detail_select_btn":1,"chk_edit_select_btn":1,"chk_detail_inline_edit":1,"chk_edit_inline_edit":1}' AFTER `sequence`;]]></sql>
 		</table>
 	</tables>
 </schema>
