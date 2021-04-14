@@ -146,7 +146,7 @@ function getAssociatedProducts($module, $focus, $seid = '', $refModuleName = fal
 //                                                ON attachments.attachment_crmid=vtiger_inventoryproductrel.productid                                                
 // 		                        WHERE id=?
 // 		                        ORDER BY sequence_no"; 
-        $query="SELECT 
+/*        $query="SELECT
 					case when vtiger_products.productid != '' then vtiger_products.productname else vtiger_service.servicename end as productname,
  		            case when vtiger_products.productid != '' then vtiger_products.productcode else vtiger_service.service_no end as productcode, 
 					case when vtiger_products.productid != '' then vtiger_products.usageunit else vtiger_service.service_usageunit end as usageunit,									
@@ -177,12 +177,12 @@ function getAssociatedProducts($module, $focus, $seid = '', $refModuleName = fal
                                                     FROM vtiger_seattachmentsrel, vtiger_attachments, vtiger_inventoryproductrel 
                                                     WHERE vtiger_seattachmentsrel.crmid=vtiger_inventoryproductrel.productid AND 
                                                         vtiger_attachments.attachmentsid=vtiger_seattachmentsrel.attachmentsid 
-                                                    /*GROUP BY attachment_crmid DESC*/
+                                                    GROUP BY attachment_crmid DESC
                                                   ) attachments
                                                 ON attachments.attachment_crmid=vtiger_inventoryproductrel.productid                                                
  		                        WHERE id=?
- 		                        ORDER BY sequence_no"; 
-		/*$query="SELECT
+ 		                        ORDER BY sequence_no"; */
+		$query="SELECT
 					case when vtiger_products.productid != '' then vtiger_products.productname else vtiger_service.servicename end as productname,
 					case when vtiger_products.productid != '' then vtiger_products.product_no else vtiger_service.service_no end as productcode,
 					case when vtiger_products.productid != '' then vtiger_products.unit_price else vtiger_service.unit_price end as unit_price,
@@ -194,7 +194,7 @@ function getAssociatedProducts($module, $focus, $seid = '', $refModuleName = fal
 					LEFT JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_inventoryproductrel.productid
 					LEFT JOIN vtiger_products ON vtiger_products.productid=vtiger_inventoryproductrel.productid
 					LEFT JOIN vtiger_service ON vtiger_service.serviceid=vtiger_inventoryproductrel.productid
-					WHERE id=? ORDER BY sequence_no";*/
+					WHERE id=? ORDER BY sequence_no";
 			$params = array($focus->id);
         // SalesPlatform.ru end    
 	}
