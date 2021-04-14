@@ -475,7 +475,7 @@ class PDFMaker_PDFContentUtils_Model extends Vtiger_Base_Model {
         $sequence = "1";
         $show_img = $retImage = "";
 
-        $Size = array("height"=>"","width"=>"83");
+        $Size = array("height"=>"","width"=>"500");
         if (isset($images[$productid . "_" . $sequence])) {
             $width = $height = "";
             if ($images[$productid . "_" . $sequence]["width"] > 0)
