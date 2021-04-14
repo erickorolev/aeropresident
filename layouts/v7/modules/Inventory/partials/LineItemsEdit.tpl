@@ -91,22 +91,6 @@
 						<div class="col-lg-4 col-md-4 col-sm-4">
 							<h4 class='fieldBlockHeader' style="margin-top:5px;">{vtranslate($BLOCK_LABEL, $MODULE)}</h4>
 						</div>
-						<div class="col-lg-8 col-md-8 col-sm-8" style="top: 3px;">
-							{if $LINEITEM_FIELDS['region_id'] && $LINEITEM_FIELDS['region_id']->isEditable()}
-								<span class="pull-right">
-									<i class="fa fa-info-circle"></i>&nbsp;
-									<label>{vtranslate($LINEITEM_FIELDS['region_id']->get('label'), $MODULE)}</label>&nbsp;
-									<select class="select2" id="region_id" name="region_id" style="width: 164px;">
-										<option value="0" data-info="{Vtiger_Util_Helper::toSafeHTML(Zend_Json::encode($DEFAULT_TAX_REGION_INFO))}">{vtranslate('LBL_SELECT_OPTION', $MODULE)}</option>
-										{foreach key=TAX_REGION_ID item=TAX_REGION_INFO from=$TAX_REGIONS}
-											<option value="{$TAX_REGION_ID}" data-info='{Vtiger_Util_Helper::toSafeHTML(Zend_Json::encode($TAX_REGION_INFO))}' {if $TAX_REGION_ID eq $RECORD->get('region_id')}selected{/if}>{$TAX_REGION_INFO['name']}</option>
-										{/foreach}
-									</select>
-									<input type="hidden" id="prevRegionId" value="{$RECORD->get('region_id')}" />
-									&nbsp;&nbsp;<a class="fa fa-wrench" href="index.php?module=Vtiger&parent=Settings&view=TaxIndex" target="_blank" style="vertical-align:middle;"></a>
-								</span>
-							{/if}
-						</div>
 					</div>
 				</div>
 				<div class="col-lg-3 col-md-3 col-sm-3" style="top: 3px;">
