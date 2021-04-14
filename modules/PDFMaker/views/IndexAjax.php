@@ -821,7 +821,7 @@ class PDFMaker_IndexAjax_View extends Vtiger_Index_View {
             $prodImg = "";
             $i = 0;
             $noCheck = ' checked="checked" ';
-            $width = "100";
+            $width = "500";
             $height = "";
             foreach ($data as $attid => $images) {
                 if ($attid != "") {
@@ -839,7 +839,7 @@ class PDFMaker_IndexAjax_View extends Vtiger_Index_View {
                         $bac_products[$productid . "_" . $seq] = $attid;
                         $checked = ' checked="checked" ';
                         $noCheck = "";
-                        $width = "100";
+                        $width = "500";
                         $height = "";
                     }
                     $prodImg.='<td valign="middle"><input type="radio" name="img_' . $productid . '_' . $seq . '" value="' . $attid . '"' . $checked . '/>
