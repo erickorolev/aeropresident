@@ -29,19 +29,19 @@
 				</div>
 				<div class="menu-item app-item dropdown-toggle" data-default-url="index.php?module=Leads&view=List">
 					<div class="menu-items-wrapper">
-						<span class="app-icon-list fa fa-users"></span>
+						<img src="test/logo/menu/leads.png" alt="leads.png" style="max-height: 30px; max-width: 30px;">
 						<span class="app-name textOverflowEllipsis"> {vtranslate('Leads')}</span>
 					</div>
 				</div>
 				<div class="menu-item app-item dropdown-toggle" data-default-url="index.php?module=Potentials&view=List">
 					<div class="menu-items-wrapper">
-						<span class="app-icon-list fa fa-dot-circle-o"></span>
+						<img src="test/logo/menu/deals.png" alt="leads.png" style="max-height: 30px; max-width: 30px;">
 						<span class="app-name textOverflowEllipsis"> {vtranslate('Potentials')}</span>
 					</div>
 				</div>
 				<div class="menu-item app-item dropdown-toggle" data-default-url="index.php?module=Products&view=List">
 					<div class="menu-items-wrapper">
-						<span class="app-icon-list vicon-products"></span>
+						<img src="test/logo/menu/products.png" alt="products.png" style="max-height: 30px; max-width: 30px;">
 						<span class="app-name textOverflowEllipsis"> {vtranslate('Products')}</span>
 					</div>
 				</div>
@@ -60,7 +60,11 @@
 						{/foreach}
 						<div class="menu-item app-item dropdown-toggle app-item-color-{$APP_NAME}" data-app-name="{$APP_NAME}" id="{$APP_NAME}_modules_dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true" data-default-url="{$FIRST_MENU_MODEL->getDefaultUrl()}&app={$APP_NAME}">
 							<div class="menu-items-wrapper app-menu-items-wrapper">
-								<span class="app-icon-list fa {$APP_IMAGE_MAP.$APP_NAME}"></span>
+								{if $APP_NAME eq 'INVENTORY'}
+								<img src="test/logo/menu/offers.png" alt="offers.png" style="max-height: 30px; max-width: 30px;">
+								{else if $APP_NAME eq 'SUPPORT'}
+								<img src="test/logo/menu/clients.png" alt="clients.png" style="max-height: 30px; max-width: 30px;">
+								{/if}
 								<span class="app-name textOverflowEllipsis"> {vtranslate("LBL_$APP_NAME")}</span>
 								<span class="fa fa-chevron-right pull-right"></span>
 							</div>
@@ -70,7 +74,16 @@
 								{assign var='translatedModuleLabel' value=vtranslate($moduleModel->get('label'),$moduleName )}
 								<li>
 									<a href="{$moduleModel->getDefaultUrl()}&app={$APP_NAME}" title="{$translatedModuleLabel}">
-										<span class="module-icon">{$moduleModel->getModuleIcon()}</span>
+										
+										{if $moduleName eq 'Quotes'}
+										<img src="test/logo/menu/offers.png" alt="offers.png" style="max-height: 30px; max-width: 30px;">
+										{else if $moduleName eq 'SalesOrder'}
+										<img src="test/logo/menu/confirmation.png" alt="confirmation.png" style="max-height: 30px; max-width: 30px;">
+										{else if $moduleName eq 'Services'}
+										<img src="test/logo/menu/service.png" alt="service.png" style="max-height: 30px; max-width: 30px;">
+										{else if $moduleName eq 'Contacts'}
+										<img src="test/logo/menu/clients.png" alt="clients.png" style="max-height: 30px; max-width: 30px;">
+										{/if}
 										<span class="module-name textOverflowEllipsis"> {$translatedModuleLabel}</span>
 									</a>
 								</li>
