@@ -43,7 +43,9 @@
                                                 <h5>
                                                     <input id="{$MODULE_NAME}Module" class="convertLeadModuleSelection" data-module="{vtranslate($MODULE_NAME,$MODULE_NAME)}" value="{$MODULE_NAME}" type="checkbox" 
                                                            {if $MODULE_NAME eq 'Contacts' or ($LEAD_COMPANY_NAME neq '' and $MODULE_NAME eq 'Accounts') or ($CONTACT_ACCOUNT_FIELD_MODEL and $CONTACT_ACCOUNT_FIELD_MODEL->isMandatory() and $MODULE_NAME neq 'Potentials')} 
-                                                               {if $MODULE_NAME == 'Accounts' && $CONTACT_ACCOUNT_FIELD_MODEL && $CONTACT_ACCOUNT_FIELD_MODEL->isMandatory()} disabled="disabled" {/if} checked="" {/if}/>
+                                                               
+                                                            {if $MODULE_NAME == 'Accounts' && $CONTACT_ACCOUNT_FIELD_MODEL && $CONTACT_ACCOUNT_FIELD_MODEL->isMandatory()} disabled="disabled" {/if} checked="" {/if}/>
+                                                           
                                                            &nbsp;&nbsp;&nbsp;{vtranslate('LBL_CREATE', $MODULE)}&nbsp;{vtranslate($SINGLE_MODULE_NAME, $MODULE_NAME)}
                                                     </h5>
                                                 </div>
@@ -51,6 +53,7 @@
                                             <div id="{$MODULE_NAME}_FieldInfo" class="{$MODULE_NAME}_FieldInfo accordion-body collapse fieldInfo {if $CONVERT_LEAD_FIELDS['Accounts'] && $MODULE_NAME == "Accounts"} in {elseif !$CONVERT_LEAD_FIELDS['Accounts'] && $MODULE_NAME == "Contacts"} in {/if}">
                                                 <hr>
                                                 {foreach item=FIELD_MODEL from=$MODULE_FIELD_MODEL}
+                                                {if $FIELD_MODEL->get('label') neq 'Amount'}
                                                     <div class="row">
                                                         <div class="fieldLabel col-lg-4">
                                                             <label class='muted pull-right'>
@@ -63,6 +66,7 @@
                                                         </div>
                                                     </div>
                                                     <br>
+                                                {/if}
                                                 {/foreach}
                                             </div>
                                         </div>
