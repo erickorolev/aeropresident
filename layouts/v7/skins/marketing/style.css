@@ -7838,3 +7838,8 @@ a.btnReport:hover {
     background-color: #ff0000;
 }
 /* SalesPlatform end */
+
+button#Potentials_detailView_basicAction_Создать_Предложение {
+    background: #6ccc6c;
+    text-shadow: none;
+}
