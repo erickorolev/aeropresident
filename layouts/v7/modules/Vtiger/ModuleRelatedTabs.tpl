@@ -14,11 +14,14 @@
 				{assign var=RELATEDLINK_URL value=$RELATED_LINK->getUrl()}
 				{assign var=RELATEDLINK_LABEL value=$RELATED_LINK->getLabel()}
 				{assign var=RELATED_TAB_LABEL value={vtranslate('SINGLE_'|cat:$MODULE_NAME, $MODULE_NAME)}|cat:" "|cat:$RELATEDLINK_LABEL}
+				{if $MODULE_NAME eq 'Potentials' && $RELATED_LINK->get('linkKey') neq 'LBL_RECORD_SUMMARY'}
 				<li class="tab-item {if $RELATED_TAB_LABEL==$SELECTED_TAB_LABEL}active{/if}" data-url="{$RELATEDLINK_URL}&tab_label={$RELATED_TAB_LABEL}&app={$SELECTED_MENU_CATEGORY}" data-label-key="{$RELATEDLINK_LABEL}" data-link-key="{$RELATED_LINK->get('linkKey')}" >
 					<a href="{$RELATEDLINK_URL}&tab_label={$RELATEDLINK_LABEL}&app={$SELECTED_MENU_CATEGORY}" class="textOverflowEllipsis">
 						<span class="tab-label"><strong>{vtranslate($RELATEDLINK_LABEL,{$MODULE_NAME})}</strong></span>
 					</a>
 				</li>
+				{/if}
+
 			{/foreach}
 
 			{assign var=RELATEDTABS value=$DETAILVIEW_LINKS['DETAILVIEWRELATED']}
