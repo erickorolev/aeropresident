@@ -23,7 +23,7 @@
 			{if $USER_PRIVILEGES_MODEL->hasModulePermission($DASHBOARD_MODULE_MODEL->getId())}
 				<div class="menu-item app-item dropdown-toggle" data-default-url="{$HOME_MODULE_MODEL->getDefaultUrl()}">
 					<div class="menu-items-wrapper">
-						<span class="app-icon-list fa fa-dashboard"></span>
+						<img src="test/logo/menu/dashboards.png" alt="dashboards.png" style="max-height: 30px; max-width: 30px;">
 						<span class="app-name textOverflowEllipsis"> {vtranslate('LBL_DASHBOARD',$MODULE)}</span>
 					</div>
 				</div>
@@ -83,6 +83,9 @@
 										<img src="test/logo/menu/service.png" alt="service.png" style="max-height: 30px; max-width: 30px;">
 										{else if $moduleName eq 'Contacts'}
 										<img src="test/logo/menu/clients.png" alt="clients.png" style="max-height: 30px; max-width: 30px;">
+										{else if $moduleName eq 'Accounts'}
+										<img src="test/logo/menu/accounts.png" alt="accounts.png" style="max-height: 30px; max-width: 30px;">
+										
 										{/if}
 										<span class="module-name textOverflowEllipsis"> {$translatedModuleLabel}</span>
 									</a>
