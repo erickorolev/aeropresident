@@ -46,8 +46,18 @@
 							<i class="fa fa-comment"></i> &nbsp;<span class="tab-label"><strong>{$DETAILVIEWRELATEDLINKLBL}</strong></span>
 						{else}
 							<span class="tab-icon">
+								{if $RELATEDMODULENAME eq 'Products'}
+								<img src="test/logo/menu/products.png" alt="products.png" style="max-height: 30px; max-width: 30px;">
+								{else if $RELATEDMODULENAME eq 'Quotes'}
+								<img src="test/logo/menu/offers.png" alt="offers.png" style="max-height: 30px; max-width: 30px;">
+								{else if $RELATEDMODULENAME eq 'SalesOrder'}
+								<img src="test/logo/menu/confirmation.png" alt="confirmation.png" style="max-height: 30px; max-width: 30px;">
+								{else if $RELATEDMODULENAME eq 'Services'}
+								<img src="test/logo/menu/service.png" alt="service.png" style="max-height: 30px; max-width: 30px;">
+								{else}
 								{assign var=RELATED_MODULE_MODEL value=Vtiger_Module_Model::getInstance($RELATEDMODULENAME)}  
 								{$RELATED_MODULE_MODEL->getModuleIcon()}
+								{/if}
 							</span>
 						{/if}
 						&nbsp;<span class="numberCircle hide">0</span>
