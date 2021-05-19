@@ -28,7 +28,7 @@
         {if $IS_INDIVIDUAL_TAX_TYPE}{assign var=COL_SPAN3 value=$COL_SPAN3 - 1}{else}{assign var=COL_SPAN3 value=$COL_SPAN3 -1}{/if}
         <th colspan="1" class="lineItemBlockHeader">
             {assign var=FINAL_DETAILS value=$RELATED_PRODUCTS.1.final_details}
-            {vtranslate('LBL_TAX_MODE', $MODULE_NAME)} : {vtranslate($FINAL_DETAILS.taxtype, $MODULE_NAME)}
+           
         </th>
         </thead>
         <tr>
