@@ -54,6 +54,8 @@
 								<img src="test/logo/menu/confirmation.png" alt="confirmation.png" style="max-height: 30px; max-width: 30px;">
 								{else if $RELATEDMODULENAME eq 'Services'}
 								<img src="test/logo/menu/service.png" alt="service.png" style="max-height: 30px; max-width: 30px;">
+								{else if $RELATEDMODULENAME eq 'Flights'}
+								<img src="test/logo/menu/flights.png" alt="flights.png" style="max-height: 30px; max-width: 30px;">
 								{else}
 								{assign var=RELATED_MODULE_MODEL value=Vtiger_Module_Model::getInstance($RELATEDMODULENAME)}  
 								{$RELATED_MODULE_MODEL->getModuleIcon()}
