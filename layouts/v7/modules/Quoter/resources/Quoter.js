@@ -3959,8 +3959,8 @@ jQuery(document).ready(function () {
                     var totalSetting = response.result.totalSettings;
                     //add section dropdown
                     var sectionSettings = response.result.sectionSettings;
-                    Quoter_Js.addSectionDropDown(sectionSettings);
-                    Quoter_Js.addRunningSubTotalDropDown(totalSetting);
+                    //Quoter_Js.addSectionDropDown(sectionSettings);
+                    //Quoter_Js.addRunningSubTotalDropDown(totalSetting);
                     var quoterInstance = new Quoter_Js();
                     quoterInstance.columnSetting = setting;
                     quoterInstance.totalSetting = totalSetting;
