@@ -19,7 +19,7 @@
     <table class="table table-bordered ui-sortable" id="lineItemTab" style="margin-top: 10px; table-layout: fixed;">
         <thead>
         <th colspan=1 class="lineItemBlockHeader">
-            Item Details
+            {vtranslate('LBL_ITEM_DETAILS', $MODULE_NAME)}
         </th>
         <th colspan=1 class="lineItemBlockHeader">
             {assign var=CURRENCY_INFO value=$PARENT_RECORD_MODEL->getCurrencyInfo()}
