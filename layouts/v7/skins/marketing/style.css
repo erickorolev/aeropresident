@@ -7843,3 +7843,14 @@ button#Potentials_detailView_basicAction_Создать_Предложение {
     background: #6ccc6c;
     text-shadow: none;
 }
+
+div[data-value="Closed Lost"] > div.vdProgressView-Active {
+  border-top: 15px solid red !important;
+    border-bottom: 15px solid red !important;
+    border-left: 10px solid transparent !important;
+    box-shadow: 0 -2px 0 red !important;
+}
+
+div[data-value="Closed Lost"] > div.vdProgressView-Active:after {
+    color: red !important;
+}
