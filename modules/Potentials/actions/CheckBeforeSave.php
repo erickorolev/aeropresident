@@ -25,7 +25,7 @@ class Potentials_CheckBeforeSave_Action extends Vtiger_Action_Controller {
 
          	 if($dataArr['sales_stage'] == 'Closed Lost' && !$dataArr['cf_1252']) {
 			     $response = "ALERT";
-			     $message = "Для закрытия Сделки со статусом Закрыта неудачно вам необходимо указать причину в поле Причина закрытия";
+			     $message = "Закрытие сделки со статусом Закрыта неудачно возможно только в режиме редактирования карты сделки";
 			 }
 			 echo json_encode(array('response' => $response, 'message' => $message));
 
