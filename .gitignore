@@ -19,3 +19,4 @@ parent_tabdata.php
 /portal/writeable/templates_c/*
 /user_privileges
 /vendor
+test/vtlib/*

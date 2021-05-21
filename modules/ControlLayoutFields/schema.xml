@@ -1,0 +1,35 @@
+<?xml version='1.0'?>
+<schema>
+	<tables>
+		<table>
+			<name>vte_control_layout_fields</name>
+			<sql><![CDATA[CREATE TABLE `vte_control_layout_fields` (
+        `id`  int(11) NOT NULL AUTO_INCREMENT ,
+        `module`  varchar(50) NULL ,
+        `description`  varchar(255) NULL ,
+        `field`  varchar(255) NULL ,
+        `condition`  text NULL ,
+        `layout`  varchar(255) NULL ,
+        PRIMARY KEY (`id`)
+        );]]></sql>
+		</table>
+		<table>
+			<name>vte_control_layout_fields_task</name>
+			<sql><![CDATA[CREATE TABLE `vte_control_layout_fields_task` (
+          `id` int(11) NOT NULL AUTO_INCREMENT,
+          `clf_id` int(11) NOT NULL,
+          `name` varchar(255) COLLATE utf8_unicode_ci DEFAULT NULL,
+          `active` smallint(1) DEFAULT 0,
+          `actions` text COLLATE utf8_unicode_ci,
+          PRIMARY KEY (`id`)
+        );]]></sql>
+		</table>
+		<table>
+			<name>vte_modules</name>
+			<sql><![CDATA[CREATE TABLE `vte_modules` (
+                `module`  varchar(50) NOT NULL ,
+                `valid`  int(1) NULL ,
+                PRIMARY KEY (`module`));]]></sql>
+		</table>
+	</tables>
+</schema>
