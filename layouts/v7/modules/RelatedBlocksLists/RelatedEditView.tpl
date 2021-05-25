@@ -7,6 +7,7 @@
 * ****************************************************************************** */*}
 {strip}
     {assign var=WIDTHTYPE value=$USER_MODEL->get('rowheight')}
+
     {foreach from=$BLOCKS_LIST key=BLOCKID item=BLOCKDATA}
         {assign var="RELMODULE_MODEL" value=$BLOCKDATA['relmodule']}
         {assign var="RELMODULE_NAME" value=$RELMODULE_MODEL->getName()}
@@ -23,6 +24,11 @@
         {assign var=IS_MODULE_VIEWABLE value= $RELMODULE_MODEL->isPermitted('View') && $CUSTOMIZABLE_OPTIONS->chk_detail_view_icon}
         {assign var=IS_MODULE_DELETABLE value=$RELMODULE_MODEL->isPermitted('Delete') && $CUSTOMIZABLE_OPTIONS->chk_edit_delete_icon}
         <br>
+
+        {if $SOURCE_MODULE eq "SalesOrder" || $SOURCE_MODULE eq "Quotes"}
+        {continue}
+        {/if}
+        
         <div class="fieldBlockContainer">
             <div class="clearfix blockContainer" data-block-id="{$BLOCKID}">
                 <h4 class="fieldBlockHeader pull-left">{vtranslate($RELMODULE_NAME, $RELMODULE_NAME)} {if $BLOCKDATA['filtervalue'] != '' && $BLOCKDATA['filterfield'] != ''}({$BLOCKDATA['filtervalue']}){/if}</h4>
