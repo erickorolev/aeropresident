@@ -7576,3 +7576,8 @@ input:focus:-ms-input-placeholder {
     background-color: #ff0000;
 }
 /* SalesPlatform end */
+
+button#Quotes_detailView_basicAction_Создать_Подтверждение {
+    background: #6ccc6c;
+    text-shadow: none;
+}
