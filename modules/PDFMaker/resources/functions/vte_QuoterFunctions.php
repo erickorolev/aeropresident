@@ -1,9 +1,11 @@
 <?php
 
 if (!function_exists('getFieldValueOfItem')) {
-    function getFieldValueOfItem($fieldName, $recordId, $itemNo, $module){
+    function getFieldValueOfItem($fieldName, $recordId, $itemNo, $module)
+    {
         $result = '';
-        if(!empty($module)&&!empty($fieldName)){
+
+        if (!empty($module) && !empty($fieldName)) {
             global $adb;
 
             $moduleModel = Vtiger_Module_Model::getInstance($module);
@@ -12,10 +14,10 @@ if (!function_exists('getFieldValueOfItem')) {
             $servicesModuleModel = Vtiger_Module_Model::getInstance('Services');
             $quoterModuleModel = new Quoter_Module_Model();
             $setting = $quoterModuleModel->getSettingForModule($module);
-            $fieldName = sprintf("%s",strtolower($fieldName));
+            $fieldName = sprintf("%s", strtolower($fieldName));
 
-            if(checkVTEItemsActive()){
-                $query="SELECT
+            if (checkVTEItemsActive()) {
+                $query = "SELECT
 					case when vtiger_products.productid != '' then vtiger_products.productname else vtiger_service.servicename end as item_name,
 					case when vtiger_products.productid != '' then 'Products' else 'Services' end as mapping_module,
  		                        vtiger_vteitems.*
@@ -29,8 +31,8 @@ if (!function_exists('getFieldValueOfItem')) {
  		                        GROUP BY sequence
  		                        ORDER BY sequence
  		                        LIMIT 1";
-            }else{
-                $query="SELECT
+            } else {
+                $query = "SELECT
 					case when vtiger_products.productid != '' then vtiger_products.productname else vtiger_service.servicename end as item_name,
  		                        vtiger_inventoryproductrel.description AS product_description,
  		                        vtiger_inventoryproductrel.*
@@ -44,12 +46,13 @@ if (!function_exists('getFieldValueOfItem')) {
  		                        ORDER BY sequence_no
  		                        LIMIT 1";
             }
-            $params = array($recordId,$itemNo);
-            $queryResult =$adb->pquery($query,$params);
-            if($adb->num_rows($queryResult)){
+            $params = array($recordId, $itemNo);
+            $queryResult = $adb->pquery($query, $params);
+
+            if ($adb->num_rows($queryResult)) {
                 $quoterRecordModel = new Quoter_Record_Model();
-                $data =$adb->fetchByAssoc($queryResult);
-                $result  = $data[$fieldName];
+                $data = $adb->fetchByAssoc($queryResult);
+                $result = $data[$fieldName];
                 $fieldModel = $moduleModel->getField($fieldName);
 
                 if (!$fieldModel) {
@@ -59,23 +62,27 @@ if (!function_exists('getFieldValueOfItem')) {
                         if ($fieldName == $fieldSetting->columnName) {
                             if ($data['mapping_module'] == 'Products') {
                                 $fieldModel = $productsModuleModel->getField($fieldSetting->productField);
-                            } else if ($data['mapping_module'] == 'Services') {
-                                $fieldModel = $servicesModuleModel->getField($fieldSetting->serviceField);
+                            } else {
+                                if ($data['mapping_module'] == 'Services') {
+                                    $fieldModel = $servicesModuleModel->getField($fieldSetting->serviceField);
+                                }
                             }
-							if (!$fieldModel) {
+                            if (!$fieldModel) {
                                 $fieldModel = $vteItemModuleModel->getField($fieldName);
                             }
                         }
                     }
                 }
 
-                if($fieldModel->getFieldDataType() == 'boolean') {
+                if ($fieldModel->getFieldDataType() == 'boolean') {
                     $result = $result ? 'Yes' : 'No';
-                } else if (is_numeric($result)) {
-                    if (floatval($result) == 0) {
-                        $result = '';
-                    } else {
-                        $result = $quoterRecordModel->numberFormat($result);
+                } else {
+                    if (is_numeric($result)) {
+                        if (floatval($result) == 0) {
+                            $result = '';
+                        } else {
+                            $result = $quoterRecordModel->numberFormat($result);
+                        }
                     }
                 }
             }
@@ -85,7 +92,7 @@ if (!function_exists('getFieldValueOfItem')) {
             $result = str_replace('|##|', ',', $result);
         }
 
-        if (DateTime::createFromFormat('Y-m-d', $result) !== FALSE) {
+        if (DateTime::createFromFormat('Y-m-d', $result) !== false) {
             $result = DateTimeField::convertToUserFormat($result);
         }
 
@@ -94,16 +101,16 @@ if (!function_exists('getFieldValueOfItem')) {
 }
 
 if (!function_exists('getFieldValueOfTotal')) {
-    function getFieldValueOfTotal($fieldName, $recordId,$module)
+    function getFieldValueOfTotal($fieldName, $recordId, $module)
     {
         $fieldName = trim($fieldName);
         $quoterRecordModel = new Quoter_Record_Model();
-        $totalValues = $quoterRecordModel->getTotalValues($module,array($fieldName),$recordId);
-        if(!isset($totalValues[$fieldName])){
+        $totalValues = $quoterRecordModel->getTotalValues($module, array($fieldName), $recordId);
+        if (!isset($totalValues[$fieldName])) {
             $result = '';
-        }elseif(empty($totalValues[$fieldName])){
+        } elseif (empty($totalValues[$fieldName])) {
             $result = $quoterRecordModel->numberFormat(0);
-        }else{
+        } else {
             $result = $quoterRecordModel->numberFormat($totalValues[$fieldName]);
         }
         // return
@@ -115,17 +122,17 @@ if (!function_exists('getLevelOfItem')) {
     {
         $str = '';
         global $adb;
-        if(checkVTEItemsActive()){
+        if (checkVTEItemsActive()) {
             $sql = "SELECT level FROM vtiger_vteitems
 					INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_vteitems.vteitemid
 					WHERE related_to = ? AND sequence = ? AND deleted = 0";
-        }else{
+        } else {
             $sql = "SELECT level FROM vtiger_inventoryproductrel WHERE id = ? AND sequence_no = ? ";
         }
-        $rs = $adb->pquery($sql,array($recordId,$itemNo));
-        if($adb->num_rows($rs) > 0){
-            $level = $adb->query_result($rs,0,'level');
-            for($i = 1; $i<$level; $i++){
+        $rs = $adb->pquery($sql, array($recordId, $itemNo));
+        if ($adb->num_rows($rs) > 0) {
+            $level = $adb->query_result($rs, 0, 'level');
+            for ($i = 1; $i < $level; $i++) {
                 $str .= "&#8594; &nbsp; ";
             }
         }
@@ -141,11 +148,11 @@ if (!function_exists('getQuoterSectionName')) {
         global $adb;
 
         $str = '';
-        if(checkVTEItemsActive()){
+        if (checkVTEItemsActive()) {
             $sql = "SELECT section_value FROM vtiger_vteitems
 					INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_vteitems.vteitemid
                     WHERE related_to = ? AND sequence = ? AND deleted = 0";
-        }else{
+        } else {
             $sql = "SELECT section_value FROM vtiger_inventoryproductrel
                     WHERE id = ? AND sequence_no = ?";
         }
@@ -154,9 +161,9 @@ if (!function_exists('getQuoterSectionName')) {
             $section_value = $adb->query_result($rs, 0, 'section_value');
 
             if ($section_value) {
-                if($sequence >= 1){
-                    $str .= '<tr><td colspan="' .$numOfColumn. '" style = "background-color: '.$backgroundColor.'">' . $section_value . '</td></tr>';
-                }else{
+                if ($sequence >= 1) {
+                    $str .= '<tr><td colspan="'.$numOfColumn.'" style = "background-color: '.$backgroundColor.'">'.$section_value.'</td></tr>';
+                } else {
                     $str .= $section_value;
                 }
 
@@ -170,8 +177,15 @@ if (!function_exists('getQuoterSectionName')) {
 }
 
 if (!function_exists('getQuoterRunningItemName')) {
-    function getQuoterRunningItemName($moduleName, $recordId, $sequence, $numOfColumn = '', $backgroundColor = '', $dec_point='.', $thousands_sep=',')
-    {
+    function getQuoterRunningItemName(
+        $moduleName,
+        $recordId,
+        $sequence,
+        $numOfColumn = '',
+        $backgroundColor = '',
+        $dec_point = '.',
+        $thousands_sep = ','
+    ) {
         global $adb;
 
         $str = '';
@@ -187,11 +201,11 @@ if (!function_exists('getQuoterRunningItemName')) {
                 $totalFieldSetting = unserialize(decode_html($tmpTotalFieldSetting));
             }
         }
-        if(checkVTEItemsActive()){
+        if (checkVTEItemsActive()) {
             $sql = "SELECT running_item_value FROM vtiger_vteitems
 					INNER JOIN vtiger_crmentity ON vtiger_crmentity.crmid=vtiger_vteitems.vteitemid
                     WHERE related_to = ? AND sequence = ? AND deleted = 0";
-        }else{
+        } else {
             $sql = "SELECT running_item_value FROM vtiger_inventoryproductrel
                     WHERE id = ? AND sequence_no = ?";
         }
@@ -204,12 +218,13 @@ if (!function_exists('getQuoterRunningItemName')) {
                 $arrRunningItemValue = unserialize(decode_html($running_item_value));
                 foreach ($arrRunningItemValue as $name => $value) {
                     $value = floatval($value);
-                    $value = number_format($value, $decimals=2, $dec_point=$dec_point, $thousands_sep=$thousands_sep);
+                    $value = number_format($value, $decimals = 2, $dec_point = $dec_point,
+                        $thousands_sep = $thousands_sep);
                     if ($totalFieldSetting[$name]) {
-                        $name =  $totalFieldSetting[$name]['fieldLabel'];
-                        $labelTranslate = vtranslate('Running', 'Quoter')." ". $name;
+                        $name = $totalFieldSetting[$name]['fieldLabel'];
+                        $labelTranslate = vtranslate('Running', 'Quoter')." ".$name;
 
-                        $str .= '</td><tr><td colspan="' .$numOfColumn. '" style = "text-align:right; background-color: '.$backgroundColor.'">' . $labelTranslate . ':&nbsp;' . $value . '</td></tr>';
+                        $str .= '</td><tr><td colspan="'.$numOfColumn.'" style = "text-align:right; background-color: '.$backgroundColor.'">'.$labelTranslate.':&nbsp;'.$value.'</td></tr>';
                     }
                 }
             }
@@ -220,9 +235,10 @@ if (!function_exists('getQuoterRunningItemName')) {
         return $str;
     }
 }
-function checkVTEItemsActive(){
+function checkVTEItemsActive()
+{
     $vteItemsModule = Vtiger_Module_Model::getInstance('VTEItems');
-    if($vteItemsModule && $vteItemsModule->isActive()){
+    if ($vteItemsModule && $vteItemsModule->isActive()) {
         return true;
     }
     return false;
