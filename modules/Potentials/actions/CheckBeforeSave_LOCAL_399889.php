@@ -22,6 +22,7 @@ class Potentials_CheckBeforeSave_Action extends Vtiger_Action_Controller {
          $message = "";
 
          if($request->get('detailViewAjaxMode')) {
+
          	 if($dataArr['sales_stage'] == 'Closed Lost' && !$dataArr['cf_1228']) {
 			     $response = "ALERT";
 			     $message = "Закрытие сделки со статусом Закрыта неудачно возможно только в режиме редактирования карты сделки";
