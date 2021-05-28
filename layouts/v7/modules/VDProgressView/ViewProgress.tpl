@@ -203,6 +203,9 @@
                 <div class="vdProgressViewHeaderContainer list-inline slide-wrap" data-confmessage="{vtranslate('LBL_CONFIRM_MESSAGE', 'VDProgressView')}">
                     {assign var=FINISHED value=true}
                     {foreach key = key item=BAR from=$PROGRESSBARS}
+                    {if $BAR == 'Closed Lost'}
+                    {continue}
+                    {/if}
                         {assign var=CLASS_NAME value="picklistColor_{$FIELD_MODEL->getFieldName()}_{$BAR|replace:' ':'_'}"}
                         <div class="vdProgressViewHeaderColumn slider-slide-wrap {if $CURRENT_STATUS eq {vtranslate($BAR,$MODULE_NAME)}}onView{/if}" data-no = "{$key}" data-value="{$BAR}" data-toggle="tooltip"
                             data-placement="bottom" data-field-name="{$FIELD_NAME}"  data-field-label="{$FIELD_LABEL}"   data-original-title="{vtranslate($BAR,$MODULE_NAME)}" data-confirm="{$CONFIRM}">

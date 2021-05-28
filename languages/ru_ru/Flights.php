@@ -19,7 +19,7 @@ $languageStrings = array (
   'Modified By' => 'Изменено пользователем',
   'LBL_DESCRIPTION' => 'Описание',
   'LBL_ADD_RECORD' => 'Добавить перелет',
-  'Name' => 'Перелет №',
+  'Name' => 'Город вылета',
   
 );
 

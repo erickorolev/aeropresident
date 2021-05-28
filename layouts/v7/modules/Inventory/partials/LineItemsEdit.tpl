@@ -127,19 +127,6 @@
 						<input type="hidden" value="{$SELECTED_CURRENCY.currency_id}" id="selectedCurrencyId" />
 					</center>
 				</div>
-				<div class="col-lg-4 col-md-4 col-sm-4" style="top: 3px;">
-					<div style="float: right;">
-						<i class="fa fa-info-circle"></i>&nbsp;
-						<label>{vtranslate('LBL_TAX_MODE',$MODULE)}</label>&nbsp;
-						<select class="select2 lineItemTax" id="taxtype" name="taxtype" style="width: 150px;">
-                            {* SalesPlatform.ru begin *}
-                            <option value="group_tax_inc"{if $IS_GROUP_TAX_INC_TYPE} selected {/if}>{vtranslate('LBL_GROUP_TAX_INC', $MODULE)}</option>
-                            {*SalesPlatform.ru end*}
-							<option value="individual" {if $IS_INDIVIDUAL_TAX_TYPE}selected{/if}>{vtranslate('LBL_INDIVIDUAL', $MODULE)}</option>
-							<option value="group" {if $IS_GROUP_TAX_TYPE}selected{/if}>{vtranslate('LBL_GROUP', $MODULE)}</option>
-						</select>
-					</div>
-				</div>
 			</div>
 			<div class="lineitemTableContainer">
                             {* SalesPlatform.ru begin *}

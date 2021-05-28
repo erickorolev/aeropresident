@@ -10,6 +10,10 @@
 
 class Potentials_Module_Model extends Vtiger_Module_Model {
 
+	public function isSummaryViewSupported() {
+		return false;
+	}
+
 	/**
 	 * Function to get the Quick Links for the module
 	 * @param <Array> $linkParams
