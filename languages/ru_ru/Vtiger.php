@@ -530,7 +530,7 @@ $languageStrings = array(
 	//SalesPlatform.ru begin History of products changes 
 	//'Total'                        => 'Общий', 
 	//'Sub Total'                    => 'Итог'                    , // KEY 5.x: LBL_SUB_TOTAL 
-	'Total'                        => 'Общая сумма', 
+	'Total'                        => 'Стоимость', 
 	'Sub Total'                    => 'Общий итог', 
 	//SalesPlatform.ru end History of products changes 
 	'Tax Type'                     => 'Тип налога',
