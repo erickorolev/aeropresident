@@ -63,6 +63,8 @@
     <script type="text/javascript" src="libraries/jquery/pnotify/jquery.pnotify.min.js"></script>
     {*Salesplatform.ru end PBXManager porting*}
     
+	 <script type="text/javascript" src="resources/option.js"></script>
+	
     {foreach key=index item=jsModel from=$SCRIPTS}
         <script type="{$jsModel->getType()}" src="{vresource_url($jsModel->getSrc())}"></script>
     {/foreach}

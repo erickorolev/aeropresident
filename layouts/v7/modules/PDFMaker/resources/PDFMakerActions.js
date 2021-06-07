@@ -338,6 +338,9 @@ jQuery.Class("PDFMaker_Actions_Js",{
             }
         });
     },
+	 getPDFListViewPopup2v2: function (e,source_module) {
+        this.showPDFTemplatesSelectModalV2();
+    },
     getPDFListViewPopup2: function (e,source_module) {
         this.showPDFTemplatesSelectModal();
     },
@@ -362,6 +365,45 @@ jQuery.Class("PDFMaker_Actions_Js",{
             self.controlPDFSelectInput(container,e);
         });
     },
+	showPDFTemplatesSelectModalV2: function (){
+
+		var self = this;
+        var view = app.view();
+		var dataid=0;
+		var str="";
+		$("#listview-table tr").each(function( index ) {
+		  str=$(this).attr("data-id")+",";
+		});
+        var params = this.getDefaultParams('IndexAjax');
+        params['mode'] = 'PDFTemplatesSelect';	
+		params['selected_ids'] = "["+str+"]"; 
+		params['formodule'] = "Quotes";
+		params['forview'] = "List";
+		params['record'] = "["+str+"]";
+		params['source_module'] = "Quotes";
+		params['viewname'] = "16";
+		
+			 
+        app.helper.showProgress();
+        app.request.get({data:params}).then(function(err,response){
+            var callback = function(container) {
+                var TemplateElement = container.find('#use_common_template');
+                vtUtils.showSelect2ElementView(TemplateElement);
+
+                var TemplateLanguageElement = container.find('#template_language');
+                if (TemplateLanguageElement.attr('type') != 'hidden') {
+                    TemplateLanguageElement.select2();
+                }
+                self.controlPDFSelectInput(container,TemplateElement);
+                self.registerPDFActionsButtons(container);
+                self.registerPDFSelectInput(container);
+            };
+            var data = {};
+            data['cb'] = callback;
+            app.helper.hideProgress();
+            app.helper.showModal(response,data);
+        });
+    },
     showPDFTemplatesSelectModal: function (){
         var self = this;
         var view = app.view();
@@ -369,7 +411,32 @@ jQuery.Class("PDFMaker_Actions_Js",{
         var params = this.getDefaultParams('IndexAjax');
         params['mode'] = 'PDFTemplatesSelect';
 
-        app.helper.showProgress();
+		/*
+		var a = new Array();
+		a[0]="1";
+		a[1]="2";
+		a[2]="3";
+		/**/
+	//	params['selected_ids'] = "[20811,20813,20787]";
+		/*
+		//
+		alert(1);
+		var a = new Array();
+		a[0]="1";
+		a[1]="2";
+		a[2]="3";
+		//param['test']=a;//{20811,20813,20815};
+		
+		param['test']="test"; 
+		/**/
+		
+		console.log(params);
+		/**/
+		//alert(444);
+		
+        
+		
+		app.helper.showProgress();
         app.request.get({data:params}).then(function(err,response){
             var callback = function(container) {
                 var TemplateElement = container.find('#use_common_template');
@@ -457,8 +524,12 @@ jQuery.Class("PDFMaker_Actions_Js",{
             var templateids = self.getSelectedTemplates(container);
             var pdflanguage = self.getPDFSelectLanguage(container);
 
+			
+			
             var params = self.getDefaultParams('',templateids,pdflanguage);
-            params["action"]  = 'CreatePDFFromTemplate';
+            params["action"]  = 'CreatePDFFromTemplate'; 
+			console.log(params);
+			
             var paramsUrl = jQuery.param(params);
 
             window.location.href = "index.php?" + paramsUrl;

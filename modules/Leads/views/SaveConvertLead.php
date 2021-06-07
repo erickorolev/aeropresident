@@ -7,6 +7,13 @@
  * Portions created by vtiger are Copyright (C) vtiger.
  * All Rights Reserved.
  *************************************************************************************/
+
+/*
+ini_set('error_reporting', E_ALL);
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1); 
+/**/
+
 vimport('~~/include/Webservices/ConvertLead.php');
 
 class Leads_SaveConvertLead_View extends Vtiger_View_Controller {
@@ -75,7 +82,13 @@ class Leads_SaveConvertLead_View extends Vtiger_View_Controller {
 			$this->showError($request, $e);
 			exit;
 		}
-
+		
+		if(!empty($result['Potentials'])) {
+			$potIdComponents = vtws_getIdComponents($result['Potentials']);
+			$potentialsId = $potIdComponents[1];
+			header("Location: index.php?module=Potentials&action=Convert&mode=CreateQ&record=$potentialsId&leadid=".$recordId);
+			exit; 
+		}
 		if(!empty($result['Accounts'])) {
 			$accountIdComponents = vtws_getIdComponents($result['Accounts']);
 			$accountId = $accountIdComponents[1];

@@ -43,8 +43,17 @@
 									>{if $IS_SELECT_BUTTON eq false}<i class="fa fa-plus"></i>&nbsp;{/if}&nbsp;{$RELATED_LINK->getLabel()}</button>
 							{/if}
 						{/if}
+						
 					</div>
 				{/foreach}
+				
+		
+				{if $MODULE=="Quotes"}
+				{if $RELATED_MODULE_NAME=="Flights"}
+				<button class="btn btn-default" id="" onclick="PDFMaker_Actions_Js.getPDFListViewPopup2v2(this,'Quotes');">PDF</button>
+				{/if}
+				{/if}
+				
 				&nbsp;
 			</div>
 			{assign var=CLASS_VIEW_ACTION value='relatedViewActions'}

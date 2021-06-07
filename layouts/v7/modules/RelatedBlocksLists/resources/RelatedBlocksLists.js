@@ -1577,11 +1577,26 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                 app.request.post(actionParams).then(
                     function(err,data) {
                         if(err == null && data) {
+							
+							var returnFlight=false;
+							var noBackFlight=0;
+							var cityFrom="";
+							var cityTo="";
+							
+							if ($(".relatedRecords").hasClass("lastrelBlock"))
+							{
+								if ($(".lastrelBlock").find("[data-fieldname=cf_1233]").prop('checked'))
+								{
+									cityFrom=$(".lastrelBlock").find("[data-fieldname=name]").val();
+									cityTo=$(".lastrelBlock").find("[data-fieldname=cf_1183]").val();
+									noBackFlight=$(".lastrelBlock").find("[data-fieldname=cf_1235]").val();
+									returnFlight=true;
+								}
+							}
+							
                             var newRow=jQuery('<div class="relatedRecords" data-row-no="'+sequenceNumber+'"><input type="hidden" name="relatedblockslists['+blockId+']['+sequenceNumber+'][module]" value="'+relModule+'"/>'+data+'</div>');
 
                             element.closest('div.row').before(newRow);
-                            //thisInstance.applyWidthForFields(newRow);
-                            //relatedblockslists.find('div.relatedRecords:last').after(newRow);
 
                             thisInstance.updateLineItemsElementWithSequenceNumber(newRow,blockId,sequenceNumber);
                             vtUtils.applyFieldElementsView(newRow);
@@ -1602,6 +1617,24 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                             $('#EditView').vtValidate();
                             $('input[type="text"]').on('change',function(){$(this).focus();$(this).blur()})
                             thisInstance.applyWidthForFields(newRow,true);
+
+							$(".relatedRecords").removeClass("lastrelBlock");
+							$(".relatedRecords").last().addClass("lastrelBlock");
+							var no=$(".lastrelBlock").attr("data-row-no");
+							$(".lastrelBlock").find("[data-fieldname=cf_1235]").val(no);
+							
+							if (returnFlight==true)
+							{
+								$(".lastrelBlock").find("[data-fieldname=cf_1233]").attr("disabled", true);
+								$(".lastrelBlock").find("[data-fieldname=cf_1237]").val(noBackFlight);	
+								$(".lastrelBlock").find("[data-fieldname=name]").val(cityTo);
+								$(".lastrelBlock").find("[data-fieldname=cf_1183]").val(cityFrom);
+								$(".lastrelBlock").find("[data-fieldname=name]").prop('readonly', true);
+								$(".lastrelBlock").find("[data-fieldname=cf_1183]").prop('readonly', true);
+									
+							}
+							$(".lastrelBlock").find("[data-fieldname=cf_1237]").prop('readonly', true);
+							$(".lastrelBlock").find("[data-fieldname=cf_1235]").prop('readonly', true);
                         }
                     }
                 );
