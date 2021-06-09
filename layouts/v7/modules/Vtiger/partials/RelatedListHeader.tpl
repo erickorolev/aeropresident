@@ -48,10 +48,8 @@
 				{/foreach}
 				
 		
-				{if $MODULE=="Quotes"}
-				{if $RELATED_MODULE_NAME=="Flights"}
-				<button class="btn btn-default" id="" onclick="PDFMaker_Actions_Js.getPDFListViewPopup2v2(this,'Quotes');">PDF</button>
-				{/if}
+				{if $MODULE=="Potentials" && $RELATED_MODULE_NAME=="Quotes"}
+				<button class="btn btn-default" id="" onclick="PDFMaker_Actions_Js.getPDFListViewPopup2v2(this,'Quotes');">PDF Export</button>
 				{/if}
 				
 				&nbsp;

@@ -9,7 +9,13 @@
 {strip}
 	{assign var=RELATED_MODULE_NAME value=$RELATED_MODULE->get('name')}
 	{include file="PicklistColorMap.tpl"|vtemplate_path:$MODULE LISTVIEW_HEADERS=$RELATED_HEADERS}
-	<div class="relatedContainer">
+	<div class="relatedContainer"> 
+	
+	
+
+ 
+ 
+
 		{assign var=IS_RELATION_FIELD_ACTIVE value="{if $RELATION_FIELD}{$RELATION_FIELD->isActiveField()}{else}false{/if}"}
 		<input type="hidden" name="currentPageNum" value="{$PAGING->getCurrentPage()}" />
 		<input type="hidden" name="relatedModuleName" class="relatedModuleName" value="{$RELATED_MODULE_NAME}" />
@@ -31,6 +37,10 @@
 				<label class="showBundlesInInventory checkbox"><input type="checkbox" {if $IS_VIEWABLE}checked{/if} value="{$IS_VIEWABLE}">&nbsp;&nbsp;{vtranslate('LBL_SHOW_BUNDLE_IN_INVENTORY', $MODULE)}</label>
 			</div>
 		{/if}
+		
+		
+	
+		
 
 		<div class="relatedContents col-lg-12 col-md-12 col-sm-12 table-container">
 			<div class="bottomscroll-div">
@@ -94,6 +104,13 @@
 								data-recordUrl='{$RELATED_RECORD->getDetailViewUrl()}'
 							{/if}>
 							<td class="related-list-actions">
+							
+									{if $RELATED_MODULE_NAME eq 'Quotes'}
+										{if $MODULE eq 'Potentials'}
+											<span><input type='checkbox' class='pdfExport' /></span>
+										{/if}
+									{/if}
+									
 								<span class="actionImages">&nbsp;&nbsp;&nbsp;
 									{if $IS_EDITABLE && $RELATED_RECORD->isEditable()}
 										{if $RELATED_MODULE_NAME eq 'PriceBooks' AND (!empty($RELATED_HEADERS['listprice']) || !empty($RELATED_HEADERS['unit_price']))}
