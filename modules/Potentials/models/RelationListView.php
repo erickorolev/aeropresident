@@ -23,5 +23,18 @@ class Potentials_RelationListView_Model extends Vtiger_RelationListView_Model {
 		return $createViewUrl;
 	}
 
+	public function getHeaders()
+    {
+        $headers = parent::getHeaders();
+        //var_dump(array_keys($headers));die;
+		if ($this->getRelatedModuleModel()->getName() === 'Quotes') {
+		    unset($headers['hdnGrandTotal']);
+        }
+        return $headers;
+    }
+
 }
+
+
+
 ?>
