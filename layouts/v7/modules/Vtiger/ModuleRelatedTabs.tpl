@@ -39,8 +39,9 @@
 				<li class="tab-item {if (trim($RELATED_LINK->getLabel())== trim($SELECTED_TAB_LABEL)) && ($RELATED_LINK->getId() == $SELECTED_RELATION_ID)}active{/if}" data-url="{$RELATED_LINK->getUrl()}&tab_label={$RELATED_LINK->getLabel()}&app={$SELECTED_MENU_CATEGORY}" data-label-key="{$RELATED_LINK->getLabel()}"
 					data-module="{$RELATEDMODULENAME}" data-relation-id="{$RELATED_LINK->getId()}" {if $RELATEDMODULENAME eq "ModComments"} title {else} title="{$DETAILVIEWRELATEDLINKLBL}"{/if} {if $RELATEDFIELDNAME}data-relatedfield ="{$RELATEDFIELDNAME}"{/if}>
 					<a href="index.php?{$RELATED_LINK->getUrl()}&tab_label={$RELATED_LINK->getLabel()}&app={$SELECTED_MENU_CATEGORY}" class="textOverflowEllipsis" displaylabel="{$DETAILVIEWRELATEDLINKLBL}" recordsCount="" >
+						
 						{if $RELATEDMODULENAME eq "ModComments"}
-							<i class="fa fa-comment"></i> &nbsp;<span class="tab-label"><strong>{$DETAILVIEWRELATEDLINKLBL}</strong></span>
+							<img src="test/logo/menu/comments.png" alt="comments.png" style="max-height: 30px; max-width: 30px;">
 						{else}
 							<span class="tab-icon">
 								{if $RELATEDMODULENAME eq 'Products'}
@@ -53,6 +54,8 @@
 								<img src="test/logo/menu/service.png" alt="service.png" style="max-height: 30px; max-width: 30px;">
 								{else if $RELATEDMODULENAME eq 'Flights'}
 								<img src="test/logo/menu/flights.png" alt="flights.png" style="max-height: 30px; max-width: 30px;">
+								{else if $RELATEDMODULENAME eq 'Contacts'}
+								<img src="test/logo/menu/contacts.png" alt="contacts.png" style="max-height: 30px; max-width: 30px;">
 								{else}
 								{assign var=RELATED_MODULE_MODEL value=Vtiger_Module_Model::getInstance($RELATEDMODULENAME)}  
 								{$RELATED_MODULE_MODEL->getModuleIcon()}
