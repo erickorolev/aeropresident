@@ -15,6 +15,9 @@
             <div class="btn-group">
             {assign var=STARRED value=$RECORD->get('starred')}
             {foreach item=DETAIL_VIEW_BASIC_LINK from=$DETAILVIEW_LINKS['DETAILVIEWBASIC']}
+            {if $DETAIL_VIEW_BASIC_LINK->getLabel() === "Создать Предложение"}
+            {continue}
+            {/if}
                 <button class="btn btn-default" id="{$MODULE_NAME}_detailView_basicAction_{Vtiger_Util_Helper::replaceSpaceWithUnderScores($DETAIL_VIEW_BASIC_LINK->getLabel())}"
                         {if $DETAIL_VIEW_BASIC_LINK->isPageLoadLink()}
                             onclick="window.location.href = '{$DETAIL_VIEW_BASIC_LINK->getUrl()}&app={$SELECTED_MENU_CATEGORY}'"
