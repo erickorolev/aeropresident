@@ -83,6 +83,9 @@ $this->fonttrans = array(
 $this->fontdata = array(
 	"opiumnewc" => array(
 		'R' => "OpiumNewC.ttf",
+		'B' => "OpiumNewC-Bold.ttf",
+		'I' => "OpiumNewC-Italic.ttf",
+		'BI' => "OpiumNewC-BoldItalic.ttf",
 	),
 	"dejavusanscondensed" => array(
 		'R' => "DejaVuSansCondensed.ttf",
