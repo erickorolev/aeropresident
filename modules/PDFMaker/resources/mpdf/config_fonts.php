@@ -87,6 +87,12 @@ $this->fontdata = array(
 		'I' => "OpiumNewC-Italic.ttf",
 		'BI' => "OpiumNewC-BoldItalic.ttf",
 	),
+	"azgaramondc" => array(
+		'R' => "AZGaramondC.ttf",
+		'B' => "AZGaramondC-Bold.ttf",
+		'I' => "AZGaramondC-Italic.ttf",
+		'BI' => "AZGaramondC-BoldItalic.ttf",
+	),
 	"dejavusanscondensed" => array(
 		'R' => "DejaVuSansCondensed.ttf",
 		'B' => "DejaVuSansCondensed-Bold.ttf",
