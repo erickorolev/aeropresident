@@ -83,6 +83,8 @@ function GetLangOpts($llcc, $adobeCJK, &$fontdata)
 			break;
 
 		CASE "ru": CASE "rus": // Russian	// CYRILLIC
+		$unifont = "opiumnewc";
+			break;
 		CASE "ab": CASE "abk": // Abkhaz
 		CASE "av": CASE "ava": // Avaric
 		CASE "ba": CASE "bak": // Bashkir
