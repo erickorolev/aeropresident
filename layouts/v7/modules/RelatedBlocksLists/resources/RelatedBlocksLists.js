@@ -1577,11 +1577,12 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                 app.request.post(actionParams).then(
                     function(err,data) {
                         if(err == null && data) {
-							
+							 
 							var returnFlight=false;
 							var noBackFlight=0;
 							var cityFrom="";
 							var cityTo="";
+							
 							
 							if ($(".relatedRecords").hasClass("lastrelBlock"))
 							{
@@ -1593,6 +1594,8 @@ Vtiger.Class("RelatedBlocksLists_Js",{
 									returnFlight=true;
 								}
 							}
+							
+							
 							
                             var newRow=jQuery('<div class="relatedRecords" data-row-no="'+sequenceNumber+'"><input type="hidden" name="relatedblockslists['+blockId+']['+sequenceNumber+'][module]" value="'+relModule+'"/>'+data+'</div>');
 
@@ -1618,10 +1621,13 @@ Vtiger.Class("RelatedBlocksLists_Js",{
                             $('input[type="text"]').on('change',function(){$(this).focus();$(this).blur()})
                             thisInstance.applyWidthForFields(newRow,true);
 
+						
 							$(".relatedRecords").removeClass("lastrelBlock");
 							$(".relatedRecords").last().addClass("lastrelBlock");
 							var no=$(".lastrelBlock").attr("data-row-no");
 							$(".lastrelBlock").find("[data-fieldname=cf_1235]").val(no);
+							
+							$(".lastrelBlock").find("[data-fieldname=cf_1235]").closest("tr").hide();
 							
 							if (returnFlight==true)
 							{
@@ -1880,16 +1886,26 @@ Vtiger.Class("RelatedBlocksLists_Js",{
         var thisInstance = this;
         var button = container.find('.relatedBtnDelete');
         // 
-        button.unbind().click(function(e) {
+        button.unbind().click(function(e) { 
+			  
+			var returnFlight=jQuery(e.currentTarget).closest(".relatedRecords").find("[data-fieldname=cf_1237]").val();
+			
+			if (returnFlight>0)
+			{
+				jQuery(e.currentTarget).closest(".relatedRecords").prev(".relatedRecords").find("[data-fieldname=cf_1233]").prop("checked",false);
+			}
+			
             //container.on('click','.relatedBtnDelete',function(e){
             var element = jQuery(e.currentTarget);
             var src_record =jQuery('[name="record"]').val();
             if(src_record == undefined){
                 src_record =jQuery('[name="record_id"]').val();
-            }
+            } 
             // Delete record
-            var record=element.data('record-id');
-            if(record) {
+            var record=element.data('record-id'); 
+			//alert(src_record+" = "+record); input [data-fieldname=cf_1237]
+
+			if(record) {
                 var deleteMessage = 'Do you want delete this record ?';
                 app.helper.showConfirmationBox({
                     message: deleteMessage
@@ -1926,6 +1942,11 @@ Vtiger.Class("RelatedBlocksLists_Js",{
             }else{
                 element.closest('.relatedRecords').remove();
             }
+			
+			$(".relatedRecords").removeClass("lastrelBlock");
+			$(".relatedRecords").last().addClass("lastrelBlock");
+			
+			//alert(1);
         });
     },
     collapseExpandBlock : function(){

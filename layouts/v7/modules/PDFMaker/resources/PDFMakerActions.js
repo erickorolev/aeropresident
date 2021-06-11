@@ -185,7 +185,7 @@ jQuery.Class("PDFMaker_Actions_Js",{
             params['language'] = pdflanguage;
         }
 		
-		if ((app.getModuleName()=="Potentials")&&(jQuery('.relatedModuleName').val()=="Quotes"))
+		if ((app.getModuleName()=="Potentials")&&((jQuery('.relatedModuleName').val()=="Quotes")||(jQuery('.relatedModuleName').val()=="SalesOrder")))
 		{
 			let selected = [];
 			var count=0;
@@ -201,9 +201,9 @@ jQuery.Class("PDFMaker_Actions_Js",{
 			if (count>0)
 			{					
 				params['selected_ids'] =selected;
-				params['formodule'] = "Quotes";
+				params['formodule'] = jQuery('.relatedModuleName').val();
 				params['forview'] = "List";
-				params['source_module'] = "Quotes";
+				params['source_module'] = jQuery('.relatedModuleName').val();
 			}
 		}
 		
@@ -361,7 +361,7 @@ jQuery.Class("PDFMaker_Actions_Js",{
         });
     },
 	 getPDFListViewPopup2v2: function (e,source_module) {
-        this.showPDFTemplatesSelectModalV2();
+        this.showPDFTemplatesSelectModalV2(source_module);
     },
     getPDFListViewPopup2: function (e,source_module) {
         this.showPDFTemplatesSelectModal();
@@ -387,7 +387,7 @@ jQuery.Class("PDFMaker_Actions_Js",{
             self.controlPDFSelectInput(container,e);
         });
     },
-	showPDFTemplatesSelectModalV2: function (){
+	showPDFTemplatesSelectModalV2: function (source_module){
 
 		var self = this;
         var view = app.view();

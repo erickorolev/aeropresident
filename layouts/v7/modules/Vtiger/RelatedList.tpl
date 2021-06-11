@@ -105,7 +105,7 @@
 							{/if}>
 							<td class="related-list-actions">
 							
-									{if $RELATED_MODULE_NAME eq 'Quotes'}
+									{if $RELATED_MODULE_NAME eq 'Quotes' || $RELATED_MODULE_NAME eq 'SalesOrder' }
 										{if $MODULE eq 'Potentials'}
 											<span><input type='checkbox' class='pdfExport' /></span>
 										{/if}

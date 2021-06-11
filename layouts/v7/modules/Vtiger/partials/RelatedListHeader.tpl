@@ -49,8 +49,13 @@
 				
 		
 				{if $MODULE=="Potentials" && $RELATED_MODULE_NAME=="Quotes"}
-				<button class="btn btn-default" id="" onclick="PDFMaker_Actions_Js.getPDFListViewPopup2v2(this,'Quotes');">PDF Export</button>
+				<button class="btn btn-default" id="" onclick="PDFMaker_Actions_Js.getPDFListViewPopup2v2(this,'Quotes');">Экспорт в пдф</button>
 				{/if}
+				
+				{if $MODULE=="Potentials" && $RELATED_MODULE_NAME=="SalesOrder"}
+				<button class="btn btn-default" id="" onclick="PDFMaker_Actions_Js.getPDFListViewPopup2v2(this,'SalesOrder');">Экспорт в пдф</button>
+				{/if}
+				
 				
 				&nbsp;
 			</div>
