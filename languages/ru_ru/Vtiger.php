@@ -497,8 +497,8 @@ $languageStrings = array(
 	'Email Opt Out'                => 'Не отправлять E-mail',
 	'Expected Close Date'          => 'Ожидаемая дата закрытия',
 	'Fax'                          => 'Факс'                    ,
-	'Last Name'                    => 'Фамилия'              ,
-	'First Name'                   => 'Имя'                      ,
+	'Last Name'                    => 'Имя'              ,
+	'First Name'                   => 'Фамилия'                      ,
 	'High'                         => 'Высокий'                        , // TODO: Review
         //SalesPlatform.ru begin
 	'Medium'                       => 'Средний'                        , // TODO: Review

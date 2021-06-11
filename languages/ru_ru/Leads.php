@@ -54,9 +54,7 @@ $languageStrings = array(
     'Lead Image' => 'Изображение Закявки',
     'Phone' => 'Телефон',
     'Secondary Email' => 'Второй адрес электронной почты',
-    'Email' => 'Email',  
-    'Last Name'                    => 'Имя'              ,
-	'First Name'                   => 'Фамилия' 
+    'Email' => 'Email'
 
 );
 $jsLanguageStrings = array(
