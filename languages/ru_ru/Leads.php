@@ -54,7 +54,10 @@ $languageStrings = array(
     'Lead Image' => 'Изображение Закявки',
     'Phone' => 'Телефон',
     'Secondary Email' => 'Второй адрес электронной почты',
-    'Email' => 'Email',    
+    'Email' => 'Email',  
+    'Last Name'                    => 'Имя'              ,
+	'First Name'                   => 'Фамилия' 
+
 );
 $jsLanguageStrings = array(
 	'JS_SELECT_CONTACTS'           => 'Выберите контакты для продолжения'  , // TODO: Review
